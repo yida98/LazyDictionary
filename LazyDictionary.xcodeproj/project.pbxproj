@@ -11,6 +11,10 @@
 		E4A27D2926AA0B7E0085497A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D2826AA0B7E0085497A /* ContentView.swift */; };
 		E4A27D2B26AA0B810085497A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E4A27D2A26AA0B810085497A /* Assets.xcassets */; };
 		E4A27D2E26AA0B810085497A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E4A27D2D26AA0B810085497A /* Preview Assets.xcassets */; };
+		E4A27D3626AA0FFC0085497A /* ScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D3526AA0FFC0085497A /* ScannerView.swift */; };
+		E4A27D3826AA16F60085497A /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D3726AA16F60085497A /* CameraView.swift */; };
+		E4A27D3A26AA1A040085497A /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D3926AA1A040085497A /* CameraViewModel.swift */; };
+		E4A27D3C26AA336A0085497A /* View+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D3B26AA336A0085497A /* View+ext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +24,10 @@
 		E4A27D2A26AA0B810085497A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E4A27D2D26AA0B810085497A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E4A27D2F26AA0B810085497A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E4A27D3526AA0FFC0085497A /* ScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerView.swift; sourceTree = "<group>"; };
+		E4A27D3726AA16F60085497A /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		E4A27D3926AA1A040085497A /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+		E4A27D3B26AA336A0085497A /* View+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+ext.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +62,10 @@
 			children = (
 				E4A27D2626AA0B7E0085497A /* LazyDictionaryApp.swift */,
 				E4A27D2826AA0B7E0085497A /* ContentView.swift */,
+				E4A27D3526AA0FFC0085497A /* ScannerView.swift */,
+				E4A27D3726AA16F60085497A /* CameraView.swift */,
+				E4A27D3926AA1A040085497A /* CameraViewModel.swift */,
+				E4A27D3B26AA336A0085497A /* View+ext.swift */,
 				E4A27D2A26AA0B810085497A /* Assets.xcassets */,
 				E4A27D2F26AA0B810085497A /* Info.plist */,
 				E4A27D2C26AA0B810085497A /* Preview Content */,
@@ -138,8 +150,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E4A27D3626AA0FFC0085497A /* ScannerView.swift in Sources */,
 				E4A27D2926AA0B7E0085497A /* ContentView.swift in Sources */,
+				E4A27D3C26AA336A0085497A /* View+ext.swift in Sources */,
 				E4A27D2726AA0B7E0085497A /* LazyDictionaryApp.swift in Sources */,
+				E4A27D3A26AA1A040085497A /* CameraViewModel.swift in Sources */,
+				E4A27D3826AA16F60085497A /* CameraView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
