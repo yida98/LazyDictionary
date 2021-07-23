@@ -15,6 +15,7 @@
 		E4A27D3826AA16F60085497A /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D3726AA16F60085497A /* CameraView.swift */; };
 		E4A27D3A26AA1A040085497A /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D3926AA1A040085497A /* CameraViewModel.swift */; };
 		E4A27D3C26AA336A0085497A /* View+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D3B26AA336A0085497A /* View+ext.swift */; };
+		E4A27D4026AA5EE00085497A /* Image+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D3F26AA5EE00085497A /* Image+ext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		E4A27D3726AA16F60085497A /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		E4A27D3926AA1A040085497A /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
 		E4A27D3B26AA336A0085497A /* View+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+ext.swift"; sourceTree = "<group>"; };
+		E4A27D3F26AA5EE00085497A /* Image+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+ext.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				E4A27D3726AA16F60085497A /* CameraView.swift */,
 				E4A27D3926AA1A040085497A /* CameraViewModel.swift */,
 				E4A27D3B26AA336A0085497A /* View+ext.swift */,
+				E4A27D3F26AA5EE00085497A /* Image+ext.swift */,
 				E4A27D2A26AA0B810085497A /* Assets.xcassets */,
 				E4A27D2F26AA0B810085497A /* Info.plist */,
 				E4A27D2C26AA0B810085497A /* Preview Content */,
@@ -151,6 +154,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E4A27D3626AA0FFC0085497A /* ScannerView.swift in Sources */,
+				E4A27D4026AA5EE00085497A /* Image+ext.swift in Sources */,
 				E4A27D2926AA0B7E0085497A /* ContentView.swift in Sources */,
 				E4A27D3C26AA336A0085497A /* View+ext.swift in Sources */,
 				E4A27D2726AA0B7E0085497A /* LazyDictionaryApp.swift in Sources */,

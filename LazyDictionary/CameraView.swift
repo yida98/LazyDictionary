@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import Vision
 
 struct CameraView: View {
     
@@ -50,60 +51,53 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> CameraViewController {
         let controller = CameraViewController()
         controller.delegate = context.coordinator
+        
         return controller
     }
     
     func updateUIViewController(_ uiViewController: CameraViewController, context: Context) {
-        
-        uiViewController.didTapRecord()
+        uiViewController.startRunning()
     }
     
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
     
-    class Coordinator: NSObject, AVCapturePhotoCaptureDelegate {
+    class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         let parent: CameraViewRepresentable
         
         init(_ parent: CameraViewRepresentable) {
             self.parent = parent
         }
         
-        func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-            guard let imageData = photo.fileDataRepresentation() else {
-                debugPrint("Photo does not have data representation!")
+        func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
                 return
             }
             
-            guard let image = UIImage(data: imageData) else {
-                debugPrint("Cannot get image from data!")
-                return
-            }
-                        
-            parent.image = image
+//            debugPrint("capturing")
         }
+        
         
     }
 }
 
 class CameraViewController: UIViewController {
     
-    var image: UIImage?
-    
+    var sequenceHandler = VNSequenceRequestHandler()
+
     var captureSession = AVCaptureSession()
     var backCamera: AVCaptureDevice?
     var frontCamera: AVCaptureDevice?
     var currentCamera: AVCaptureDevice?
-    var photoOutput: AVCapturePhotoOutput?
     var cameraPreviewLayer: AVCaptureVideoPreviewLayer?
+    var videoOutput: AVCaptureVideoDataOutput?
     
     //DELEGATE
-    var delegate: AVCapturePhotoCaptureDelegate?
+    var delegate: AVCaptureVideoDataOutputSampleBufferDelegate?
     
-    func didTapRecord() {
-        
-        let settings = AVCapturePhotoSettings()
-        photoOutput?.capturePhoto(with: settings, delegate: delegate!)
+    func startRunning() {
+        captureSession.startRunning()
         
     }
     
@@ -111,15 +105,17 @@ class CameraViewController: UIViewController {
         super.viewDidLoad()
         setup()
     }
+    
     func setup() {
         setupCaptureSession()
         setupDevice()
         setupInputOutput()
         setupPreviewLayer()
-        startRunningCaptureSession()
+//        startRunningCaptureSession()
     }
+    
     func setupCaptureSession() {
-        captureSession.sessionPreset = AVCaptureSession.Preset.photo
+        captureSession.sessionPreset = AVCaptureSession.Preset.hd1280x720
     }
     
     func setupDevice() {
@@ -144,30 +140,49 @@ class CameraViewController: UIViewController {
     
     func setupInputOutput() {
         do {
-            
             let captureDeviceInput = try AVCaptureDeviceInput(device: currentCamera!)
             captureSession.addInput(captureDeviceInput)
-            photoOutput = AVCapturePhotoOutput()
-            photoOutput?.setPreparedPhotoSettingsArray([AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])], completionHandler: nil)
-            captureSession.addOutput(photoOutput!)
+            videoOutput = AVCaptureVideoDataOutput()
+            videoOutput!.videoSettings = ["kCVPixelBufferPixelFormatTypeKey": "kCVPixelFormatType_32BGRA"]
+            videoOutput!.setSampleBufferDelegate(delegate, queue: DispatchQueue.main)
+            videoOutput!.alwaysDiscardsLateVideoFrames = true
+            captureSession.addOutput(videoOutput!)
             
         } catch {
             print(error)
         }
         
     }
-    func setupPreviewLayer()
-    {
+    
+    func setupPreviewLayer() {
         self.cameraPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         self.cameraPreviewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
         self.cameraPreviewLayer?.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
         self.cameraPreviewLayer?.frame = self.view.frame
         self.view.layer.insertSublayer(cameraPreviewLayer!, at: 0)
+
+    }
+    
+    func highlighWord(box: VNTextObservation) {
+        guard let boxes = box.characterBoxes else {
+            debugPrint("Cannot create character boxes")
+            return
+        }
+        var maxX: CGFloat = boxes.map { $0.bottomLeft.x }.max() ?? .infinity
+        var maxY: CGFloat = boxes.map { $0.bottomRight.y }.max() ?? .infinity
+        var minX: CGFloat = boxes.map { $0.bottomLeft.y }.min() ?? .zero
+        var minY: CGFloat = boxes.map { $0.bottomRight.y }.min() ?? .zero
         
+        let xCord = maxX * self.view.frame.size.width
+        let yCord = (1 - minY) * self.view.frame.size.height
+        let width = (minX - maxX) * self.view.frame.size.width
+        let height = (minY - maxY) * self.view.frame.size.height
+            
+        let outline = CALayer()
+        outline.frame = CGRect(x: xCord, y: yCord, width: width, height: height)
+        outline.borderWidth = 2.0
+        outline.borderColor = UIColor.red.cgColor
+            
+        self.view.layer.addSublayer(outline)
     }
-    func startRunningCaptureSession(){
-        captureSession.startRunning()
-    }
-    
-    
 }

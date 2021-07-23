@@ -30,4 +30,23 @@ class CameraViewModel: ObservableObject {
         }
         
     }
+    
+    func getWord() {
+        guard let cgImg = image.cgImage else {
+            debugPrint("Image unavailable")
+            return
+        }
+        let requestHandler = VNImageRequestHandler(cgImage: cgImg, options: [:])
+        let saliencyRequest = VNGenerateAttentionBasedSaliencyImageRequest { request, error in
+            guard let results = request.results as? [VNSaliencyImageObservation] else {
+                debugPrint("Cannot get result!")
+                return
+            }
+            
+        }
+        
+//        guard let results = saliencyRequest.results?.first else{return}
+//        let observations = results as? VNSaliencyImageObservation
+//        let salientObjects = observation.salientObjects
+    }
 }
