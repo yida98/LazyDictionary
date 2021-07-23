@@ -15,43 +15,29 @@ struct CameraView: View {
     
     var body: some View {
         ZStack {
-            CameraViewRepresentable(image: $viewModel.image)
-            VStack {
-                GeometryReader { geometry in
-                    Rectangle()
-                        .frame(width: 60, height: 20)
-                        .foregroundColor(Color.clear)
-                        .border(Color.black, width: 2)
-                        .onAppear {
-                            viewModel.bounds = geometry.frame(in: .global)
-                        }
-                }
-                    
-//                Button {
-//                    viewModel.image = self.snapshot(bounds: viewModel.bounds)
-//                } label: {
-//                    Circle()
-//                        .frame(width: 60, height: 60)
-//                        .foregroundColor(Color.white)
-//                }
-
-                Image(uiImage: viewModel.image)
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .border(Color.black, width: 2)
-                    .scaledToFit()
+            CameraViewRepresentable(controller: $viewModel.controller, viewModel: viewModel)
+                .ignoresSafeArea()
+            ForEach(viewModel.coords, id: \.self) { rect in
+                Rectangle()
+                    .frame(width: rect.width, height: rect.height)
+                    .foregroundColor(Color.clear)
+                    .border(Color.red, width: 2)
+                    .position(x: rect.minX, y: rect.minY)
+                    .ignoresSafeArea()
             }
+                
         }
+        .ignoresSafeArea()
     }
 }
 
 struct CameraViewRepresentable: UIViewControllerRepresentable {
-    @Binding var image: UIImage
+    @Binding var controller: CameraViewController
+    var viewModel: CameraViewModel
     
     func makeUIViewController(context: Context) -> CameraViewController {
-        let controller = CameraViewController()
+//        let controller = CameraViewController()
         controller.delegate = context.coordinator
-        
         return controller
     }
     
@@ -66,6 +52,8 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
     class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         let parent: CameraViewRepresentable
         
+        var sequenceHandler = VNSequenceRequestHandler()
+        
         init(_ parent: CameraViewRepresentable) {
             self.parent = parent
         }
@@ -74,18 +62,43 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
                 return
             }
+            let captureRequest = VNDetectTextRectanglesRequest(completionHandler: detectText)
+            do {
+                try sequenceHandler.perform([captureRequest],
+                                            on: pixelBuffer)
+            } catch {
+                debugPrint(error.localizedDescription)
+            }
             
-//            debugPrint("capturing")
+//            parent.viewModel.coords = [CGRect]()
         }
         
-        
+        private func detectText(request: VNRequest, error: Error?) {
+            guard let results = request.results as? [VNTextObservation] else {
+                return
+            }
+            for result in results {
+                debugPrint("Screen: \(Constant.screenBounds.size) \n Centre: \(Constant.centrePoint)")
+                let bounds = result.boundingBox
+                let normalizedBounds = CGRect(x: bounds.minX *
+                                                Constant.screenBounds.size.width,
+                                              y: bounds.minY * Constant.screenBounds.size.height,
+                                              width: bounds.width * Constant.screenBounds.size.width,
+                                              height: bounds.height * Constant.screenBounds.size.height)
+                debugPrint("Bounds: \(bounds)\n \(bounds.minY), \(bounds.maxY) Normalized:  \(normalizedBounds)")
+                if Constant.centrePoint.x <= normalizedBounds.maxX &&
+                    Constant.centrePoint.y <= normalizedBounds.maxY &&
+                    Constant.centrePoint.x >= normalizedBounds.minX &&
+                    Constant.centrePoint.y >= normalizedBounds.minY {
+                    parent.viewModel.coords.append(normalizedBounds)
+                }
+            }
+        }
     }
 }
 
 class CameraViewController: UIViewController {
     
-    var sequenceHandler = VNSequenceRequestHandler()
-
     var captureSession = AVCaptureSession()
     var backCamera: AVCaptureDevice?
     var frontCamera: AVCaptureDevice?
@@ -98,7 +111,6 @@ class CameraViewController: UIViewController {
     
     func startRunning() {
         captureSession.startRunning()
-        
     }
     
     override func viewDidLoad() {
@@ -111,7 +123,6 @@ class CameraViewController: UIViewController {
         setupDevice()
         setupInputOutput()
         setupPreviewLayer()
-//        startRunningCaptureSession()
     }
     
     func setupCaptureSession() {
@@ -163,26 +174,27 @@ class CameraViewController: UIViewController {
 
     }
     
-    func highlighWord(box: VNTextObservation) {
-        guard let boxes = box.characterBoxes else {
-            debugPrint("Cannot create character boxes")
-            return
-        }
-        var maxX: CGFloat = boxes.map { $0.bottomLeft.x }.max() ?? .infinity
-        var maxY: CGFloat = boxes.map { $0.bottomRight.y }.max() ?? .infinity
-        var minX: CGFloat = boxes.map { $0.bottomLeft.y }.min() ?? .zero
-        var minY: CGFloat = boxes.map { $0.bottomRight.y }.min() ?? .zero
-        
-        let xCord = maxX * self.view.frame.size.width
-        let yCord = (1 - minY) * self.view.frame.size.height
-        let width = (minX - maxX) * self.view.frame.size.width
-        let height = (minY - maxY) * self.view.frame.size.height
-            
-        let outline = CALayer()
-        outline.frame = CGRect(x: xCord, y: yCord, width: width, height: height)
-        outline.borderWidth = 2.0
-        outline.borderColor = UIColor.red.cgColor
-            
-        self.view.layer.addSublayer(outline)
-    }
+//    func highlighWord(box: VNTextObservation) {
+//        guard let boxes = box.characterBoxes else {
+//            debugPrint("Cannot create character boxes")
+//            return
+//        }
+//        let maxX: CGFloat = boxes.map { $0.bottomLeft.x }.max() ?? .infinity
+//        let maxY: CGFloat = boxes.map { $0.bottomRight.y }.max() ?? .infinity
+//        let minX: CGFloat = boxes.map { $0.bottomLeft.y }.min() ?? .zero
+//        let minY: CGFloat = boxes.map { $0.bottomRight.y }.min() ?? .zero
+//
+//        let xCord = maxX * self.view.frame.size.width
+//        let yCord = (1 - minY) * self.view.frame.size.height
+//        let width = (minX - maxX) * self.view.frame.size.width
+//        let height = (minY - maxY) * self.view.frame.size.height
+//
+//        let outline = CALayer()
+//        outline.frame = CGRect(x: xCord, y: yCord, width: width, height: height)
+//        outline.borderWidth = 2.0
+//        outline.borderColor = UIColor.red.cgColor
+//
+//        self.view.layer.addSublayer(outline)
+//    }
+    
 }

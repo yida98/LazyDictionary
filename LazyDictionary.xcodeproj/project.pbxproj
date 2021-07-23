@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E477771926AAA686000B3139 /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477771826AAA686000B3139 /* Constant.swift */; };
 		E4A27D2726AA0B7E0085497A /* LazyDictionaryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D2626AA0B7E0085497A /* LazyDictionaryApp.swift */; };
 		E4A27D2926AA0B7E0085497A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D2826AA0B7E0085497A /* ContentView.swift */; };
 		E4A27D2B26AA0B810085497A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E4A27D2A26AA0B810085497A /* Assets.xcassets */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E477771826AAA686000B3139 /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 		E4A27D2326AA0B7E0085497A /* LazyDictionary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LazyDictionary.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4A27D2626AA0B7E0085497A /* LazyDictionaryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyDictionaryApp.swift; sourceTree = "<group>"; };
 		E4A27D2826AA0B7E0085497A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -69,6 +71,7 @@
 				E4A27D3926AA1A040085497A /* CameraViewModel.swift */,
 				E4A27D3B26AA336A0085497A /* View+ext.swift */,
 				E4A27D3F26AA5EE00085497A /* Image+ext.swift */,
+				E477771826AAA686000B3139 /* Constant.swift */,
 				E4A27D2A26AA0B810085497A /* Assets.xcassets */,
 				E4A27D2F26AA0B810085497A /* Info.plist */,
 				E4A27D2C26AA0B810085497A /* Preview Content */,
@@ -156,6 +159,7 @@
 				E4A27D3626AA0FFC0085497A /* ScannerView.swift in Sources */,
 				E4A27D4026AA5EE00085497A /* Image+ext.swift in Sources */,
 				E4A27D2926AA0B7E0085497A /* ContentView.swift in Sources */,
+				E477771926AAA686000B3139 /* Constant.swift in Sources */,
 				E4A27D3C26AA336A0085497A /* View+ext.swift in Sources */,
 				E4A27D2726AA0B7E0085497A /* LazyDictionaryApp.swift in Sources */,
 				E4A27D3A26AA1A040085497A /* CameraViewModel.swift in Sources */,
