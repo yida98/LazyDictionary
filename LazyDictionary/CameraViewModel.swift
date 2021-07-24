@@ -8,6 +8,7 @@
 import Foundation
 import Vision
 import SwiftUI
+import Combine
 
 class CameraViewModel: ObservableObject {
     
@@ -15,12 +16,6 @@ class CameraViewModel: ObservableObject {
     @Published var coords: [CGRect] = [CGRect]()
     
     init() {
-//        let initRect = CGRect(x: 108.6, y: 1.4000000000000032, width: 260.6, height: 20.3)
-//        coords.append(initRect)
-//        let initRect1 = CGRect(x: 207.6, y: 20.4000000000000032, width: 216.6, height: 20.3)
-//        coords.append(initRect1)
-//        let initRect2 = CGRect(x: 132, y: -220.4000000000000032, width: 261.6, height: 20.3)
-//        coords.append(initRect2)
     }
 //    let request = VNRecognizeTextRequest { request, error in
 //        guard let observations = request.results as? [VNRecognizedTextObservation] else {

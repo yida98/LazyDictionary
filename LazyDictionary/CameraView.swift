@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import Combine
 import Vision
 
 struct CameraView: View {
@@ -24,22 +25,11 @@ struct CameraView: View {
                         .border(Color.red, width: 2)
                         .frame(width: rect.width,
                                height: rect.height)
-                        .position(x: rect.origin.x,
-                                  y: rect.origin.y)
+                        .position(x: rect.origin.y,
+                                  y: rect.origin.x)
                         .foregroundColor(Color.clear)
-                        .clipped()
+                        
                 }
-            }
-            HStack {
-                Spacer()
-                VStack {
-                    Spacer()
-                    Circle()
-                        .frame(width: 20, height: 20)
-                        .foregroundColor(Color.white)
-                    Spacer()
-                }
-                Spacer()
             }
 //            Circle()
 //                .frame(width: 300, height: 300)
@@ -101,10 +91,15 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
                     return
                 }
                 for result in results {
+                    
                     let bounds = VNImageRectForNormalizedRect(result.boundingBox, Int(parent.controller.bufferSize.width), Int(parent.controller.bufferSize.height))
                     
-                    parent.viewModel.coords.append(bounds)
-                    print("x: \(bounds.origin.x) y: \(bounds.origin.y) w: \(bounds.width) h: \(bounds.height)")
+//                    parent.viewModel.coords.append(bounds)
+                    DispatchQueue.main.async {
+                        self.parent.viewModel.coords.append(bounds)
+                    }
+                    print(parent.controller.bufferSize, result.boundingBox, Constant.screenBounds.size, bounds)
+//                    print("x: \(bounds.origin.x) y: \(bounds.origin.y) w: \(bounds.width) h: \(bounds.height)")
     //                if Constant.centrePoint.x <= normalizedBounds.maxX &&
     //                    Constant.centrePoint.y <= normalizedBounds.maxY &&
     //                    Constant.centrePoint.x >= normalizedBounds.minX &&
@@ -127,13 +122,6 @@ class CameraViewController: UIViewController {
     
     var bufferSize: CGSize = .zero
     
-    var backCamera: AVCaptureDevice?
-    var frontCamera: AVCaptureDevice?
-    var currentCamera: AVCaptureDevice?
-    var captureDeviceInput: AVCaptureDeviceInput?
-    var cameraPreviewLayer: AVCaptureVideoPreviewLayer?
-    var videoOutput: AVCaptureVideoDataOutput?
-    
     //DELEGATE
     var delegate: AVCaptureVideoDataOutputSampleBufferDelegate?
     
@@ -148,53 +136,77 @@ class CameraViewController: UIViewController {
     
     func setup() {
         setupDevice()
-        setupInputOutput()
         setupPreviewLayer()
     }
     
-    func setupDevice() {
-        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera],
-                                                                      mediaType: AVMediaType.video,
-                                                                      position: AVCaptureDevice.Position.unspecified)
-        for device in deviceDiscoverySession.devices {
-            
-            switch device.position {
-            case AVCaptureDevice.Position.front:
-                self.frontCamera = device
-            case AVCaptureDevice.Position.back:
-                self.backCamera = device
-            default:
-                break
-            }
-        }
+    func startLiveVideo() {
+        session.sessionPreset = .photo
         
-        self.currentCamera = self.backCamera
+        var deviceInput: AVCaptureDeviceInput!
+        let videoDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: .back).devices.first
+        do {
+            deviceInput = try AVCaptureDeviceInput(device: videoDevice!)
+        } catch {
+            print("Could not create video device input: \(error)")
+            return
+        }
     }
     
-    
-    func setupInputOutput() {
+    func setupDevice() {
+        
+        var deviceInput: AVCaptureDeviceInput!
+        // Select a video device, make an input
+        let videoDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: .back).devices.first
         do {
-            let captureDeviceInput = try AVCaptureDeviceInput(device: currentCamera!)
-            session.addInput(captureDeviceInput)
-            videoOutput = AVCaptureVideoDataOutput()
-            videoOutput!.alwaysDiscardsLateVideoFrames = true
-            videoOutput!.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
-            videoOutput!.setSampleBufferDelegate(delegate, queue: videoDataOutputQueue)
-            
-            session.addOutput(videoOutput!)
-            
+            deviceInput = try AVCaptureDeviceInput(device: videoDevice!)
+        } catch {
+            print("Could not create video device input: \(error)")
+            return
+        }
+        
+        session.beginConfiguration()
+        session.sessionPreset = .vga640x480 // Model image size is smaller.
+        
+        // Add a video input
+        guard session.canAddInput(deviceInput) else {
+            print("Could not add video device input to the session")
+            session.commitConfiguration()
+            return
+        }
+        session.addInput(deviceInput)
+        if session.canAddOutput(videoDataOutput) {
+            session.addOutput(videoDataOutput)
+            // Add a video data output
+            videoDataOutput.alwaysDiscardsLateVideoFrames = true
+            videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
+            videoDataOutput.setSampleBufferDelegate(delegate, queue: videoDataOutputQueue)
+        } else {
+            print("Could not add video data output to the session")
+            session.commitConfiguration()
+            return
+        }
+        let captureConnection = videoDataOutput.connection(with: .video)
+        // Always process the frames
+        captureConnection?.isEnabled = true
+        do {
+            try videoDevice!.lockForConfiguration()
+            let dimensions = CMVideoFormatDescriptionGetDimensions((videoDevice?.activeFormat.formatDescription)!)
+            bufferSize.width = CGFloat(dimensions.width)
+            bufferSize.height = CGFloat(dimensions.height)
+            videoDevice!.unlockForConfiguration()
         } catch {
             print(error)
         }
+        session.commitConfiguration()
         
     }
     
     func setupPreviewLayer() {
-        self.cameraPreviewLayer = AVCaptureVideoPreviewLayer(session: session)
-        self.cameraPreviewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
-        self.cameraPreviewLayer?.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
-        self.cameraPreviewLayer?.frame = self.view.frame
-        self.view.layer.insertSublayer(cameraPreviewLayer!, at: 0)
+        previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        previewLayer.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
+        previewLayer.frame = self.view.frame
+        self.view.layer.insertSublayer(previewLayer, at: 0)
 
     }
     
