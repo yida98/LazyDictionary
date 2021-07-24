@@ -17,16 +17,38 @@ struct CameraView: View {
         ZStack {
             CameraViewRepresentable(controller: $viewModel.controller, viewModel: viewModel)
                 .ignoresSafeArea()
-            ForEach(viewModel.coords, id: \.self) { rect in
-                Rectangle()
-                    .frame(width: rect.width, height: rect.height)
-                    .foregroundColor(Color.clear)
-                    .border(Color.red, width: 2)
-                    .position(x: rect.minX, y: rect.minY)
-                    .ignoresSafeArea()
-            }
+            GeometryReader { geometry in
                 
-        }
+                ForEach(viewModel.coords, id: \.self) { rect in
+                    Rectangle()
+                        .border(Color.red, width: 2)
+                        .frame(width: rect.width,
+                               height: rect.height)
+                        .position(x: rect.origin.x,
+                                  y: rect.origin.y)
+                        .foregroundColor(Color.clear)
+                        .clipped()
+                }
+            }
+            HStack {
+                Spacer()
+                VStack {
+                    Spacer()
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(Color.white)
+                    Spacer()
+                }
+                Spacer()
+            }
+//            Circle()
+//                .frame(width: 300, height: 300)
+//                .position(x: (Constant.screenBounds.width/2),
+//                          y: (Constant.screenBounds.height/2))
+//                .foregroundColor(Color.blue)
+                
+        }.frame(width: Constant.screenBounds.width,
+                height: Constant.screenBounds.height)
         .ignoresSafeArea()
     }
 }
@@ -74,24 +96,22 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
         }
         
         private func detectText(request: VNRequest, error: Error?) {
-            guard let results = request.results as? [VNTextObservation] else {
-                return
-            }
-            for result in results {
-                debugPrint("Screen: \(Constant.screenBounds.size) \n Centre: \(Constant.centrePoint)")
-                let bounds = result.boundingBox
-                let normalizedBounds = CGRect(x: bounds.minX *
-                                                Constant.screenBounds.size.width,
-                                              y: bounds.minY * Constant.screenBounds.size.height,
-                                              width: bounds.width * Constant.screenBounds.size.width,
-                                              height: bounds.height * Constant.screenBounds.size.height)
-                debugPrint("Bounds: \(bounds)\n \(bounds.minY), \(bounds.maxY) Normalized:  \(normalizedBounds)")
-                if Constant.centrePoint.x <= normalizedBounds.maxX &&
-                    Constant.centrePoint.y <= normalizedBounds.maxY &&
-                    Constant.centrePoint.x >= normalizedBounds.minX &&
-                    Constant.centrePoint.y >= normalizedBounds.minY {
-                    parent.viewModel.coords.append(normalizedBounds)
+                
+                guard let results = request.results as? [VNTextObservation] else {
+                    return
                 }
+                for result in results {
+                    let bounds = VNImageRectForNormalizedRect(result.boundingBox, Int(parent.controller.bufferSize.width), Int(parent.controller.bufferSize.height))
+                    
+                    parent.viewModel.coords.append(bounds)
+                    print("x: \(bounds.origin.x) y: \(bounds.origin.y) w: \(bounds.width) h: \(bounds.height)")
+    //                if Constant.centrePoint.x <= normalizedBounds.maxX &&
+    //                    Constant.centrePoint.y <= normalizedBounds.maxY &&
+    //                    Constant.centrePoint.x >= normalizedBounds.minX &&
+    //                    Constant.centrePoint.y >= normalizedBounds.minY {
+    //                }
+
+                
             }
         }
     }
@@ -99,10 +119,18 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
 
 class CameraViewController: UIViewController {
     
-    var captureSession = AVCaptureSession()
+    private let session = AVCaptureSession()
+    private var previewLayer: AVCaptureVideoPreviewLayer! = nil
+    private let videoDataOutput = AVCaptureVideoDataOutput()
+    
+    private let videoDataOutputQueue = DispatchQueue(label: "VideoDataOutput", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    
+    var bufferSize: CGSize = .zero
+    
     var backCamera: AVCaptureDevice?
     var frontCamera: AVCaptureDevice?
     var currentCamera: AVCaptureDevice?
+    var captureDeviceInput: AVCaptureDeviceInput?
     var cameraPreviewLayer: AVCaptureVideoPreviewLayer?
     var videoOutput: AVCaptureVideoDataOutput?
     
@@ -110,7 +138,7 @@ class CameraViewController: UIViewController {
     var delegate: AVCaptureVideoDataOutputSampleBufferDelegate?
     
     func startRunning() {
-        captureSession.startRunning()
+        session.startRunning()
     }
     
     override func viewDidLoad() {
@@ -119,14 +147,9 @@ class CameraViewController: UIViewController {
     }
     
     func setup() {
-        setupCaptureSession()
         setupDevice()
         setupInputOutput()
         setupPreviewLayer()
-    }
-    
-    func setupCaptureSession() {
-        captureSession.sessionPreset = AVCaptureSession.Preset.hd1280x720
     }
     
     func setupDevice() {
@@ -152,12 +175,13 @@ class CameraViewController: UIViewController {
     func setupInputOutput() {
         do {
             let captureDeviceInput = try AVCaptureDeviceInput(device: currentCamera!)
-            captureSession.addInput(captureDeviceInput)
+            session.addInput(captureDeviceInput)
             videoOutput = AVCaptureVideoDataOutput()
-            videoOutput!.videoSettings = ["kCVPixelBufferPixelFormatTypeKey": "kCVPixelFormatType_32BGRA"]
-            videoOutput!.setSampleBufferDelegate(delegate, queue: DispatchQueue.main)
             videoOutput!.alwaysDiscardsLateVideoFrames = true
-            captureSession.addOutput(videoOutput!)
+            videoOutput!.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
+            videoOutput!.setSampleBufferDelegate(delegate, queue: videoDataOutputQueue)
+            
+            session.addOutput(videoOutput!)
             
         } catch {
             print(error)
@@ -166,7 +190,7 @@ class CameraViewController: UIViewController {
     }
     
     func setupPreviewLayer() {
-        self.cameraPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        self.cameraPreviewLayer = AVCaptureVideoPreviewLayer(session: session)
         self.cameraPreviewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
         self.cameraPreviewLayer?.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
         self.cameraPreviewLayer?.frame = self.view.frame
@@ -174,27 +198,18 @@ class CameraViewController: UIViewController {
 
     }
     
-//    func highlighWord(box: VNTextObservation) {
-//        guard let boxes = box.characterBoxes else {
-//            debugPrint("Cannot create character boxes")
-//            return
-//        }
-//        let maxX: CGFloat = boxes.map { $0.bottomLeft.x }.max() ?? .infinity
-//        let maxY: CGFloat = boxes.map { $0.bottomRight.y }.max() ?? .infinity
-//        let minX: CGFloat = boxes.map { $0.bottomLeft.y }.min() ?? .zero
-//        let minY: CGFloat = boxes.map { $0.bottomRight.y }.min() ?? .zero
-//
-//        let xCord = maxX * self.view.frame.size.width
-//        let yCord = (1 - minY) * self.view.frame.size.height
-//        let width = (minX - maxX) * self.view.frame.size.width
-//        let height = (minY - maxY) * self.view.frame.size.height
-//
-//        let outline = CALayer()
-//        outline.frame = CGRect(x: xCord, y: yCord, width: width, height: height)
-//        outline.borderWidth = 2.0
-//        outline.borderColor = UIColor.red.cgColor
-//
-//        self.view.layer.addSublayer(outline)
-//    }
-    
+}
+extension CGImagePropertyOrientation {
+    init(_ uiImageOrientation: UIImage.Orientation) {
+        switch uiImageOrientation {
+        case .up: self = .up
+        case .down: self = .down
+        case .left: self = .left
+        case .right: self = .right
+        case .upMirrored: self = .upMirrored
+        case .downMirrored: self = .downMirrored
+        case .leftMirrored: self = .leftMirrored
+        case .rightMirrored: self = .rightMirrored
+        }
+    }
 }
