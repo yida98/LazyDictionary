@@ -94,8 +94,8 @@
 			children = (
 				E4A27D2626AA0B7E0085497A /* LazyDictionaryApp.swift */,
 				E4A27D2826AA0B7E0085497A /* ContentView.swift */,
-				E4A27D3526AA0FFC0085497A /* ScannerView.swift */,
 				E4A27D3726AA16F60085497A /* CameraView.swift */,
+				E4A27D3526AA0FFC0085497A /* ScannerView.swift */,
 				E4A27D3926AA1A040085497A /* CameraViewModel.swift */,
 				E4C65BFC26B1302A0085C406 /* DictionaryView.swift */,
 				E4C65BFE26B130660085C406 /* DictionaryViewModel.swift */,

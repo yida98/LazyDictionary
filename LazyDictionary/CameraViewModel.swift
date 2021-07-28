@@ -13,7 +13,11 @@ import AVFoundation
 
 class CameraViewModel: ObservableObject {
     
-    @Published var coords: [CGRect] = [CGRect]()
+    @Published var coords: [CGRect] = [CGRect]() {
+        willSet {
+            print("will set: \(newValue)")
+        }
+    }
     @Published var bufferSize: CGSize = CGSize(width: 1, height: 1)
     
     @Published var word: String = ""
@@ -59,9 +63,10 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
                 return
             }
             
-            request.regionOfInterest = CGRect(origin: CGPoint(x: Constant.screenBounds.width/2,
+            request.regionOfInterest = normalizeBounds(for: CGRect(origin: CGPoint(x: Constant.screenBounds.width/2,
                                                               y: ((Constant.screenBounds.width / (parent.viewModel.bufferSize.height / parent.viewModel.bufferSize.width))/2)),
-                                              size: CameraViewModel.viewportSize)
+                                                                   size: CameraViewModel.viewportSize),
+                                                       in: parent.viewModel.bufferSize)
             
             let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: CGImagePropertyOrientation.rightMirrored, options: [:])
 
@@ -70,6 +75,28 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
             } catch {
                 print(error)
             }
+        }
+        
+        private func normalizeBounds(for regionOfInterest: CGRect, in bufferSize: CGSize) -> CGRect {
+            
+            var rect = regionOfInterest
+            let width = Constant.screenBounds.width
+            let height = width / (bufferSize.height / bufferSize.width)
+            rect.origin = CGPoint(x: rect.origin.x/width, y: rect.origin.y/height)
+            rect.size = CGSize(width: rect.size.width/width, height: rect.size.height/height)
+            
+            return rect
+        }
+        
+        private func normalizeSize(for regionOfInterest: CGSize, in bufferSize: CGSize) -> CGSize {
+            
+            var size = regionOfInterest
+            let width = Constant.screenBounds.width
+            let height = width / (bufferSize.height / bufferSize.width)
+
+            size = CGSize(width: size.width/width, height: size.height/height)
+            
+            return size
         }
         
     }
@@ -163,8 +190,9 @@ class CameraViewController: UIViewController {
             
             if viewModel != nil {
                 DispatchQueue.main.async { [self] in
-                    bounds = boundingBox(forRegionOfInterest: bounds, fromOutput: viewModel.bufferSize)
+                    bounds = boundingBox(forRegionOfInterest: bounds, fromOutput: CameraViewModel.viewportSize)
                     viewModel.coords.append(bounds)
+                    viewModel.word = recognizedText.string
                 }
             }
             
@@ -175,8 +203,8 @@ class CameraViewController: UIViewController {
     
     fileprivate func boundingBox(forRegionOfInterest: CGRect, fromOutput size: CGSize) -> CGRect {
         
-        let imageWidth = size.height
-        let imageHeight = size.width
+        let imageWidth = size.width
+        let imageHeight = size.height
         
         let imageRatio = imageWidth / imageHeight
         let width = Constant.screenBounds.width

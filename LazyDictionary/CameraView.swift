@@ -17,31 +17,16 @@ struct CameraView: View {
     var body: some View {
         
         ZStack {
-            CameraViewRepresentable(viewModel: viewModel)
-//                    .frame(width: 160, height: 120)
-                .position(x: Constant.screenBounds.width/2,
-                          y: ((Constant.screenBounds.width / (viewModel.bufferSize.height / viewModel.bufferSize.width))/2))
-                
-                
-            ForEach(viewModel.coords, id: \.self) { rect in
-                Spacer()
-                    .border(Color.red, width: 2)
-                    .foregroundColor(Color.clear)
-                    .frame(width: rect.width,
-                           height: rect.height)
-                    .position(x: rect.midX,
-                              y: rect.midY)
-                    
-            }
-            Rectangle()
-                .border(Color.blue, width: 1)
-                .foregroundColor(Color.clear)
-                .frame(width: CameraViewModel.viewportSize.width,
-                       height: CameraViewModel.viewportSize.height)
-                .position(x: (Constant.screenBounds.width/2),
-                          y: (Constant.screenBounds.width / (viewModel.bufferSize.height / viewModel.bufferSize.width))/2)
-                
+            Group {
+                CameraViewRepresentable(viewModel: viewModel)
+    
+                ScannerView()
+                    .environmentObject(viewModel)
+            } .position(x: Constant.screenBounds.width/2,
+                        y: ((Constant.screenBounds.width / (viewModel.bufferSize.height / viewModel.bufferSize.width))/2))
+            
             DictionaryView(viewModel: DictionaryViewModel(), word: $viewModel.word)
+                .offset(y: Constant.screenBounds.height * 0.8)
                 
         }
         .ignoresSafeArea()

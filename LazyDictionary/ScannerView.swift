@@ -9,45 +9,29 @@ import SwiftUI
 import VisionKit
 import Combine
 
-struct ScannerView: UIViewControllerRepresentable {
+struct ScannerView: View {
     
-    func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
-        let scannerViewController = VNDocumentCameraViewController()
-        scannerViewController.delegate = context.coordinator
-        return scannerViewController
-    }
+    @EnvironmentObject var viewModel: CameraViewModel
     
-    func updateUIViewController(_ uiViewController: VNDocumentCameraViewController, context: Context) { }
-    
-    class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
-        let scannerView: ScannerView
-        
-        init(with scannerView: ScannerView) {
-            self.scannerView = scannerView
-        }
-        
-        func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
-            
-        }
-        
-        func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
-            
-        }
-        
-        func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
-            var scannedObjects = [UIImage]()
-            
-            for i in 0..<scan.pageCount {
-                scannedObjects.append(scan.imageOfPage(at: i))
+    var body: some View {
+        ZStack {
+            ForEach(viewModel.coords, id: \.self) { rect in
+                Rectangle()
+                    .border(Color.red, width: 2)
+                    .foregroundColor(Color.clear)
+                    .frame(width: rect.width,
+                           height: rect.height)
+                    .offset(x: rect.origin.x, y: rect.origin.y)
+//                    .position(x: rect.midX,
+//                            y: rect.midY)
             }
-            scannerView.didFinishScanning.send(scannedObjects)
-        }
-    
+        }.background(Rectangle()
+                        .border(Color.blue, width: 1)
+                        .foregroundColor(Color.clear)
+                        .frame(width: CameraViewModel.viewportSize.width,
+                               height: CameraViewModel.viewportSize.height)
+        )
+
     }
     
-    func makeCoordinator() -> Coordinator {
-        Coordinator(with: self)
-    }
-    
-    var didFinishScanning = PassthroughSubject<[UIImage], Error>()
 }

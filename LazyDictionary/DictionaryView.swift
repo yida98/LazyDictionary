@@ -15,9 +15,9 @@ struct DictionaryView: View {
     var body: some View {
         VStack {
             Text(word)
+            Spacer()
         }.frame(width: Constant.screenBounds.width, height: Constant.screenBounds.height, alignment: .center)
         .background(Color.lightGrey)
-        .offset(y: Constant.screenBounds.height/3)
         
     }
 }
