@@ -16,20 +16,21 @@ struct CameraView: View {
     
     var body: some View {
         ZStack {
-            CameraViewRepresentable(controller: $viewModel.controller, viewModel: viewModel)
-                .ignoresSafeArea()
-            GeometryReader { geometry in
+            CameraViewRepresentable(viewModel: viewModel)
+//                    .frame(width: 160, height: 120)
+                .position(x: Constant.screenBounds.width/2,
+                          y: (Constant.screenBounds.height * viewModel.bufferSize.width/viewModel.bufferSize.height)/2)
                 
-                ForEach(viewModel.coords, id: \.self) { rect in
-                    Rectangle()
-                        .border(Color.red, width: 2)
-                        .frame(width: rect.width,
-                               height: rect.height)
-                        .position(x: rect.origin.y,
-                                  y: rect.origin.x)
-                        .foregroundColor(Color.clear)
-                        
-                }
+                
+            ForEach(viewModel.coords, id: \.self) { rect in
+                Spacer()
+                    .border(Color.red, width: 2)
+                    .foregroundColor(Color.clear)
+                    .frame(width: rect.width,
+                           height: rect.height)
+                    .position(x: rect.origin.x,
+                              y: rect.origin.y)
+                    
             }
 //            Circle()
 //                .frame(width: 300, height: 300)
@@ -37,18 +38,17 @@ struct CameraView: View {
 //                          y: (Constant.screenBounds.height/2))
 //                .foregroundColor(Color.blue)
                 
-        }.frame(width: Constant.screenBounds.width,
-                height: Constant.screenBounds.height)
+        }
         .ignoresSafeArea()
     }
 }
 
 struct CameraViewRepresentable: UIViewControllerRepresentable {
-    @Binding var controller: CameraViewController
     var viewModel: CameraViewModel
     
     func makeUIViewController(context: Context) -> CameraViewController {
-//        let controller = CameraViewController()
+        let controller = CameraViewController()
+        controller.viewModel = viewModel
         controller.delegate = context.coordinator
         return controller
     }
@@ -64,6 +64,7 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
     class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         let parent: CameraViewRepresentable
         
+        var request: VNRecognizeTextRequest!
         var sequenceHandler = VNSequenceRequestHandler()
         
         init(_ parent: CameraViewRepresentable) {
@@ -71,92 +72,79 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
         }
         
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+            
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
                 return
             }
-            let captureRequest = VNDetectTextRectanglesRequest(completionHandler: detectText)
-            do {
-                try sequenceHandler.perform([captureRequest],
-                                            on: pixelBuffer)
-            } catch {
-                debugPrint(error.localizedDescription)
+            
+            var requestOptions:[VNImageOption : Any] = [:]
+            
+            if let camData = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: nil) {
+                requestOptions = [.cameraIntrinsics:camData]
             }
+//            captureRequest.regionOfInterest = CGRect(x: <#T##CGFloat#>, y: <#T##CGFloat#>, width: <#T##CGFloat#>, height: <#T##CGFloat#>)
+//            captureRequest.reportCharacterBoxes = true
+            
+            
+            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: CGImagePropertyOrientation.rightMirrored, options: requestOptions)
+
+            do {
+                try imageRequestHandler.perform([request])
+            } catch {
+                print(error)
+            }
+            
+//            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+//                return
+//            }
+//            captureRequest.reportCharacterBoxes = true
+//            do {
+//                try sequenceHandler.perform([captureRequest],
+//                                            on: pixelBuffer)
+//            } catch {
+//                debugPrint(error.localizedDescription)
+//            }
             
 //            parent.viewModel.coords = [CGRect]()
         }
         
-        private func detectText(request: VNRequest, error: Error?) {
-                
-                guard let results = request.results as? [VNTextObservation] else {
-                    return
-                }
-                for result in results {
-                    
-                    let bounds = VNImageRectForNormalizedRect(result.boundingBox, Int(parent.controller.bufferSize.width), Int(parent.controller.bufferSize.height))
-                    
-//                    parent.viewModel.coords.append(bounds)
-                    DispatchQueue.main.async {
-                        self.parent.viewModel.coords.append(bounds)
-                    }
-                    print(parent.controller.bufferSize, result.boundingBox, Constant.screenBounds.size, bounds)
-//                    print("x: \(bounds.origin.x) y: \(bounds.origin.y) w: \(bounds.width) h: \(bounds.height)")
-    //                if Constant.centrePoint.x <= normalizedBounds.maxX &&
-    //                    Constant.centrePoint.y <= normalizedBounds.maxY &&
-    //                    Constant.centrePoint.x >= normalizedBounds.minX &&
-    //                    Constant.centrePoint.y >= normalizedBounds.minY {
-    //                }
-
-                
-            }
-        }
     }
 }
 
 class CameraViewController: UIViewController {
     
     private let session = AVCaptureSession()
-    private var previewLayer: AVCaptureVideoPreviewLayer! = nil
-    private let videoDataOutput = AVCaptureVideoDataOutput()
-    
-    private let videoDataOutputQueue = DispatchQueue(label: "VideoDataOutput", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    var previewLayer: AVCaptureVideoPreviewLayer! = nil
+    private let deviceOutput = AVCaptureVideoDataOutput()
     
     var bufferSize: CGSize = .zero
     
-    //DELEGATE
-    var delegate: AVCaptureVideoDataOutputSampleBufferDelegate?
+    var viewModel: CameraViewModel!
     
-    func startRunning() {
-        session.startRunning()
-    }
+    //DELEGATE
+    var delegate: CameraViewRepresentable.Coordinator?
     
     override func viewDidLoad() {
+        self.delegate!.request = VNRecognizeTextRequest(completionHandler: detectText)
+
         super.viewDidLoad()
         setup()
     }
     
     func setup() {
-        setupDevice()
-        setupPreviewLayer()
+        startLiveVideo()
+    }
+    
+    func startRunning() {
+        session.startRunning()
     }
     
     func startLiveVideo() {
-        session.sessionPreset = .photo
+        session.sessionPreset = .vga640x480
+        viewModel.bufferSize = CGSize(width: 640, height: 480)
         
         var deviceInput: AVCaptureDeviceInput!
-        let videoDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: .back).devices.first
-        do {
-            deviceInput = try AVCaptureDeviceInput(device: videoDevice!)
-        } catch {
-            print("Could not create video device input: \(error)")
-            return
-        }
-    }
-    
-    func setupDevice() {
-        
-        var deviceInput: AVCaptureDeviceInput!
-        // Select a video device, make an input
-        let videoDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: .back).devices.first
+        let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
         do {
             deviceInput = try AVCaptureDeviceInput(device: videoDevice!)
         } catch {
@@ -164,64 +152,102 @@ class CameraViewController: UIViewController {
             return
         }
         
-        session.beginConfiguration()
-        session.sessionPreset = .vga640x480 // Model image size is smaller.
+        deviceOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
         
-        // Add a video input
-        guard session.canAddInput(deviceInput) else {
-            print("Could not add video device input to the session")
-            session.commitConfiguration()
-            return
-        }
+        deviceOutput.alwaysDiscardsLateVideoFrames = true
+        deviceOutput.setSampleBufferDelegate(delegate, queue: DispatchQueue.global())
         session.addInput(deviceInput)
-        if session.canAddOutput(videoDataOutput) {
-            session.addOutput(videoDataOutput)
-            // Add a video data output
-            videoDataOutput.alwaysDiscardsLateVideoFrames = true
-            videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
-            videoDataOutput.setSampleBufferDelegate(delegate, queue: videoDataOutputQueue)
-        } else {
-            print("Could not add video data output to the session")
-            session.commitConfiguration()
-            return
-        }
-        let captureConnection = videoDataOutput.connection(with: .video)
-        // Always process the frames
-        captureConnection?.isEnabled = true
-        do {
-            try videoDevice!.lockForConfiguration()
-            let dimensions = CMVideoFormatDescriptionGetDimensions((videoDevice?.activeFormat.formatDescription)!)
-            bufferSize.width = CGFloat(dimensions.width)
-            bufferSize.height = CGFloat(dimensions.height)
-            videoDevice!.unlockForConfiguration()
-        } catch {
-            print(error)
-        }
-        session.commitConfiguration()
+        session.addOutput(deviceOutput)
         
-    }
-    
-    func setupPreviewLayer() {
+//        do {
+//            try videoDevice!.lockForConfiguration()
+//            let dimensions = CMVideoFormatDescriptionGetDimensions((videoDevice?.activeFormat.formatDescription)!)
+//            bufferSize.width = CGFloat(dimensions.width)
+//            bufferSize.height = CGFloat(dimensions.height)
+//            videoDevice!.unlockForConfiguration()
+//        } catch {
+//            print(error)
+//        }
         previewLayer = AVCaptureVideoPreviewLayer(session: session)
-        previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
-        previewLayer.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
+        if let previewLayerConnection = previewLayer.connection {
+            previewLayerConnection.videoOrientation = .portrait
+        }
+        
+        if let deviceConnection = deviceOutput.connection(with: .video) {
+            deviceConnection.isEnabled = true
+            deviceConnection.preferredVideoStabilizationMode = .off
+        }
+        
+//        previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
         previewLayer.frame = self.view.frame
         self.view.layer.insertSublayer(previewLayer, at: 0)
+    
+    }
 
+    private func detectText(request: VNRequest, error: Error?) {
+        
+            DispatchQueue.main.async { [self] in
+                viewModel.coords = [CGRect]()
+            }
+        guard let results = request.results as? [VNRecognizedTextObservation] else {
+            print("no requests")
+            return
+        }
+        for result in results {
+            var bounds = result.boundingBox
+            print("x: \(bounds.origin.x), y: \(bounds.origin.y), width: \(bounds.width), height: \(bounds.height)")
+            
+//                bounds = parent.controller.previewLayer.layerRectConverted(fromMetadataOutputRect: bounds)
+            if viewModel != nil {
+                DispatchQueue.main.async { [self] in
+                    bounds = boundingBox(forRegionOfInterest: bounds, fromOutput: viewModel.bufferSize)
+                    viewModel.coords.append(bounds)
+                }
+            }
+            
+        }
+        
     }
     
-}
-extension CGImagePropertyOrientation {
-    init(_ uiImageOrientation: UIImage.Orientation) {
-        switch uiImageOrientation {
-        case .up: self = .up
-        case .down: self = .down
-        case .left: self = .left
-        case .right: self = .right
-        case .upMirrored: self = .upMirrored
-        case .downMirrored: self = .downMirrored
-        case .leftMirrored: self = .leftMirrored
-        case .rightMirrored: self = .rightMirrored
-        }
+    
+    fileprivate func boundingBox(forRegionOfInterest: CGRect, fromOutput size: CGSize) -> CGRect {
+        
+        let imageWidth = size.height
+        let imageHeight = size.width
+        
+        let imageRatio = imageWidth / imageHeight
+        let width = Constant.screenBounds.width
+        let height = width / imageRatio
+        
+        // Begin with input rect.
+        var rect = forRegionOfInterest
+        
+        rect.size.height *= height
+        rect.size.width *= width
+        
+//            let temp = rect.size.height
+//            rect.size.height = rect.size.width
+//            rect.size.width = temp
+        
+        rect.origin.y = (rect.origin.y * height) + (height / 2)
+        rect.origin.x = (1 - rect.origin.x) * width
+        
+//            let tempO = rect.origin.x
+//            rect.origin.x = rect.origin.y
+//            rect.origin.y = tempO
+        
+        return rect
+        
+        // Reposition origin.
+//            rect.origin.x *= imageWidth
+//            rect.origin.x += bounds.origin.x
+//            rect.origin.y = (1 - rect.origin.y) * imageHeight + bounds.origin.y
+//
+//            // Rescale normalized coordinates.
+//            rect.size.width *= imageWidth
+//            rect.size.height *= imageHeight
+//
+//            return rect
     }
+
 }

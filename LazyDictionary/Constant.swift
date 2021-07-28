@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct Constant {
-    static let screenBounds = UIWindow().bounds
-    static let centrePoint = CGPoint(x: Constant.screenBounds.midX,
+    static let screenBounds: CGRect = UIWindow().screen.bounds
+    static let centrePoint: CGPoint = CGPoint(x: Constant.screenBounds.midX,
                                      y: Constant.screenBounds.midY)
 }
