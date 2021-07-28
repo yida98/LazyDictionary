@@ -13,11 +13,11 @@ import AVFoundation
 
 class CameraViewModel: ObservableObject {
     
-    @Published var coords: [CGRect] = [CGRect]() {
-        willSet {
-            print("will set: \(newValue)")
-        }
-    }
+    @Published var coords: [CGRect] = [CGRect]()// {
+//        willSet {
+//            print(newValue)
+//        }
+//    }
     @Published var bufferSize: CGSize = CGSize(width: 1, height: 1)
     
     @Published var word: String = ""
@@ -63,13 +63,18 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
                 return
             }
             
+            
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = true
+//            request.recognitionLanguages = [
             request.regionOfInterest = normalizeBounds(for: CGRect(origin: CGPoint(x: Constant.screenBounds.width/2,
                                                               y: ((Constant.screenBounds.width / (parent.viewModel.bufferSize.height / parent.viewModel.bufferSize.width))/2)),
                                                                    size: CameraViewModel.viewportSize),
                                                        in: parent.viewModel.bufferSize)
+//
+//            let imageRequestHandler = VNImageRequestHandler(cgImage: imageFromSampleBuffer(sampleBuffer : sampleBuffer).cgImage!, options: [:])
+            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
             
-            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: CGImagePropertyOrientation.rightMirrored, options: [:])
-
             do {
                 try imageRequestHandler.perform([request])
             } catch {
@@ -99,6 +104,40 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
             return size
         }
         
+        func imageFromSampleBuffer(sampleBuffer : CMSampleBuffer) -> UIImage {
+            // Get a CMSampleBuffer's Core Video image buffer for the media data
+            let  imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+            // Lock the base address of the pixel buffer
+            CVPixelBufferLockBaseAddress(imageBuffer!, CVPixelBufferLockFlags.readOnly)
+
+
+            // Get the number of bytes per row for the pixel buffer
+            let baseAddress = CVPixelBufferGetBaseAddress(imageBuffer!)
+
+            // Get the number of bytes per row for the pixel buffer
+            let bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer!)
+            // Get the pixel buffer width and height
+            let width = CVPixelBufferGetWidth(imageBuffer!)
+            let height = CVPixelBufferGetHeight(imageBuffer!)
+
+            // Create a device-dependent RGB color space
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+
+            // Create a bitmap graphics context with the sample buffer data
+            var bitmapInfo: UInt32 = CGBitmapInfo.byteOrder32Little.rawValue
+            bitmapInfo |= CGImageAlphaInfo.premultipliedFirst.rawValue & CGBitmapInfo.alphaInfoMask.rawValue
+            //let bitmapInfo: UInt32 = CGBitmapInfo.alphaInfoMask.rawValue
+            let context = CGContext.init(data: baseAddress, width: width, height: height, bitsPerComponent: 8, bytesPerRow: bytesPerRow, space: colorSpace, bitmapInfo: bitmapInfo)
+            // Create a Quartz image from the pixel data in the bitmap graphics context
+            let quartzImage = context?.makeImage()
+            // Unlock the pixel buffer
+            CVPixelBufferUnlockBaseAddress(imageBuffer!, CVPixelBufferLockFlags.readOnly)
+
+            // Create an image object from the Quartz image
+            let image = UIImage.init(cgImage: quartzImage!)
+
+            return image
+        }
     }
 }
 
@@ -144,7 +183,10 @@ class CameraViewController: UIViewController {
             return
         }
         
-        deviceOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
+//        deviceOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
+        
+        deviceOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+        
         
         deviceOutput.alwaysDiscardsLateVideoFrames = true
         deviceOutput.setSampleBufferDelegate(delegate, queue: DispatchQueue.global())
@@ -180,24 +222,35 @@ class CameraViewController: UIViewController {
             return
         }
         
-        for result in results {
-            
-            guard let recognizedText = result.topCandidates(CameraViewController.maxCandidates).first else {
-                continue
-            }
-            
-            var bounds = result.boundingBox
-            
-            if viewModel != nil {
-                DispatchQueue.main.async { [self] in
-                    bounds = boundingBox(forRegionOfInterest: bounds, fromOutput: CameraViewModel.viewportSize)
-                    viewModel.coords.append(bounds)
-                    viewModel.word = recognizedText.string
+        if let result = closestToCentre(in: results) {
+            if let recognizedText = result.topCandidates(CameraViewController.maxCandidates).first {
+                var bounds = result.boundingBox
+                
+                if viewModel != nil {
+                    DispatchQueue.main.async { [self] in
+                        bounds = boundingBox(forRegionOfInterest: bounds, fromOutput: CameraViewModel.viewportSize)
+                        viewModel.coords.append(bounds)
+                        viewModel.word = recognizedText.string
+                    }
                 }
             }
-            
         }
+    }
+    
+    private func closestToCentre(in results: [VNRecognizedTextObservation]) -> VNRecognizedTextObservation? {
         
+        return results.reduce(results.first) { result, observation in
+            var prevDistance = 0
+            var currDistance = 0
+            guard let prev = result else {
+                return observation
+            }
+            prevDistance += abs(Int(0.5) - Int(prev.boundingBox.midX)) + abs(Int(0.5) - Int(prev.boundingBox.midY))
+            
+            currDistance += abs(Int(0.5) - Int(observation.boundingBox.midX)) + abs(Int(0.5) - Int(observation.boundingBox.midY))
+            
+            return prevDistance > currDistance ? observation : result
+        }
     }
     
     
@@ -218,7 +271,12 @@ class CameraViewController: UIViewController {
         
         rect.origin.x = (rect.origin.x) * width
         rect.origin.y = rect.origin.y * height
-        
+//        print("before: \(rect)")
+        let bottomToTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -1)
+        let uiRotationTransform = CGAffineTransform(translationX: 1, y: 0).rotated(by: CGFloat.pi/2)
+        let transform = bottomToTopTransform.concatenating(uiRotationTransform)
+        rect = rect.applying(transform)
+//        print("after: \(rect)")
         return rect
     }
 
