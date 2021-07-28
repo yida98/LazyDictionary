@@ -15,6 +15,10 @@ class CameraViewModel: ObservableObject {
     @Published var coords: [CGRect] = [CGRect]()
     @Published var bufferSize: CGSize = CGSize(width: 1, height: 1)
     
+    
+    static let viewportSize = CGSize(width: Constant.screenBounds.width/2, height: 50)
+    
+    
 //    let request = VNRecognizeTextRequest { request, error in
 //        guard let observations = request.results as? [VNRecognizedTextObservation] else {
 //            fatalError("Recevied invalid observations")

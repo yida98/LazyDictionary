@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		298CBE746FE92B64F2B540B1 /* libPods-LazyDictionary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFBB282B80E40D7E2EC25239 /* libPods-LazyDictionary.a */; };
 		E477771926AAA686000B3139 /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477771826AAA686000B3139 /* Constant.swift */; };
 		E4A27D2726AA0B7E0085497A /* LazyDictionaryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D2626AA0B7E0085497A /* LazyDictionaryApp.swift */; };
 		E4A27D2926AA0B7E0085497A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A27D2826AA0B7E0085497A /* ContentView.swift */; };
@@ -20,6 +21,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3E8AE906944FA12B169C5AE9 /* Pods-LazyDictionary.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LazyDictionary.release.xcconfig"; path = "Target Support Files/Pods-LazyDictionary/Pods-LazyDictionary.release.xcconfig"; sourceTree = "<group>"; };
+		6C5CCB182D25F8DE58935775 /* Pods-LazyDictionary.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LazyDictionary.debug.xcconfig"; path = "Target Support Files/Pods-LazyDictionary/Pods-LazyDictionary.debug.xcconfig"; sourceTree = "<group>"; };
+		AFBB282B80E40D7E2EC25239 /* libPods-LazyDictionary.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LazyDictionary.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E477771826AAA686000B3139 /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 		E4A27D2326AA0B7E0085497A /* LazyDictionary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LazyDictionary.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4A27D2626AA0B7E0085497A /* LazyDictionaryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyDictionaryApp.swift; sourceTree = "<group>"; };
@@ -39,17 +43,37 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				298CBE746FE92B64F2B540B1 /* libPods-LazyDictionary.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		83F81CE1842C677D8F3450CD /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				6C5CCB182D25F8DE58935775 /* Pods-LazyDictionary.debug.xcconfig */,
+				3E8AE906944FA12B169C5AE9 /* Pods-LazyDictionary.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		96600E79771647025975DD84 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AFBB282B80E40D7E2EC25239 /* libPods-LazyDictionary.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E4A27D1A26AA0B7E0085497A = {
 			isa = PBXGroup;
 			children = (
 				E4A27D2526AA0B7E0085497A /* LazyDictionary */,
 				E4A27D2426AA0B7E0085497A /* Products */,
+				83F81CE1842C677D8F3450CD /* Pods */,
+				96600E79771647025975DD84 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -94,6 +118,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4A27D3226AA0B810085497A /* Build configuration list for PBXNativeTarget "LazyDictionary" */;
 			buildPhases = (
+				7F56A4BACA7AF38D3ED137AA /* [CP] Check Pods Manifest.lock */,
 				E4A27D1F26AA0B7E0085497A /* Sources */,
 				E4A27D2026AA0B7E0085497A /* Frameworks */,
 				E4A27D2126AA0B7E0085497A /* Resources */,
@@ -150,6 +175,31 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7F56A4BACA7AF38D3ED137AA /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-LazyDictionary-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E4A27D1F26AA0B7E0085497A /* Sources */ = {
@@ -288,6 +338,7 @@
 		};
 		E4A27D3326AA0B810085497A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6C5CCB182D25F8DE58935775 /* Pods-LazyDictionary.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -304,12 +355,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = carrism.LazyDictionary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
 		E4A27D3426AA0B810085497A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3E8AE906944FA12B169C5AE9 /* Pods-LazyDictionary.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -326,7 +378,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = carrism.LazyDictionary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
