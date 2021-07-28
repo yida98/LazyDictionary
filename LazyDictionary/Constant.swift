@@ -13,3 +13,7 @@ struct Constant {
     static let centrePoint: CGPoint = CGPoint(x: Constant.screenBounds.midX,
                                      y: Constant.screenBounds.midY)
 }
+
+extension Color {
+    static let lightGrey: Color = Color(white: 0.9)
+}
