@@ -20,10 +20,14 @@ class CameraViewModel: ObservableObject {
 //    }
     @Published var bufferSize: CGSize = CGSize(width: 1, height: 1)
     
-    @Published var word: String = ""
+    @Published var word: String = "" {
+        willSet {
+//            print(newValue)
+        }
+    }
     
     
-    static let viewportSize = CGSize(width: Constant.screenBounds.width/2, height: 50)
+    static let viewportSize = CGSize(width: Constant.screenBounds.width * 3/4, height: 50)
     
 }
 
@@ -65,15 +69,22 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
             
             
             request.recognitionLevel = .accurate
-            request.usesLanguageCorrection = true
+//            request.usesLanguageCorrection = true
 //            request.recognitionLanguages = [
-            request.regionOfInterest = normalizeBounds(for: CGRect(origin: CGPoint(x: Constant.screenBounds.width/2,
-                                                              y: ((Constant.screenBounds.width / (parent.viewModel.bufferSize.height / parent.viewModel.bufferSize.width))/2)),
+            
+            // The origin point is a corner, not the centre point
+            let height = (Constant.screenBounds.width / (parent.viewModel.bufferSize.height / parent.viewModel.bufferSize.width))
+            let originX = (Constant.screenBounds.width - CameraViewModel.viewportSize.width) / 2
+            let originY = (height - CameraViewModel.viewportSize.height)/2
+            
+            request.regionOfInterest = normalizeBounds(for: CGRect(origin: CGPoint(x: originX,
+                                                                                   y: originY),
                                                                    size: CameraViewModel.viewportSize),
                                                        in: parent.viewModel.bufferSize)
-//
+            print(request.regionOfInterest)
 //            let imageRequestHandler = VNImageRequestHandler(cgImage: imageFromSampleBuffer(sampleBuffer : sampleBuffer).cgImage!, options: [:])
-            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+//            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: CGImagePropertyOrientation.right, options: [:])
             
             do {
                 try imageRequestHandler.perform([request])
@@ -87,9 +98,8 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
             var rect = regionOfInterest
             let width = Constant.screenBounds.width
             let height = width / (bufferSize.height / bufferSize.width)
-            rect.origin = CGPoint(x: rect.origin.x/width, y: rect.origin.y/height)
+            rect.origin = CGPoint(x: rect.minX/width, y: rect.minY/height)
             rect.size = CGSize(width: rect.size.width/width, height: rect.size.height/height)
-            
             return rect
         }
         
@@ -228,7 +238,7 @@ class CameraViewController: UIViewController {
                 
                 if viewModel != nil {
                     DispatchQueue.main.async { [self] in
-                        bounds = boundingBox(forRegionOfInterest: bounds, fromOutput: CameraViewModel.viewportSize)
+                        bounds = boundingBox(forRegionOfInterest: bounds, fromOutput: viewModel.bufferSize)
                         viewModel.coords.append(bounds)
                         viewModel.word = recognizedText.string
                     }
@@ -272,10 +282,10 @@ class CameraViewController: UIViewController {
         rect.origin.x = (rect.origin.x) * width
         rect.origin.y = rect.origin.y * height
 //        print("before: \(rect)")
-        let bottomToTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -1)
-        let uiRotationTransform = CGAffineTransform(translationX: 1, y: 0).rotated(by: CGFloat.pi/2)
-        let transform = bottomToTopTransform.concatenating(uiRotationTransform)
-        rect = rect.applying(transform)
+//        let bottomToTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -1)
+//        let uiRotationTransform = CGAffineTransform.identity// CGAffineTransform(translationX: 0, y: 1).rotated(by: -CGFloat.pi)
+//        let transform = bottomToTopTransform.concatenating(uiRotationTransform)
+//        rect = rect.applying(transform)
 //        print("after: \(rect)")
         return rect
     }
