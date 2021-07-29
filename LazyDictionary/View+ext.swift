@@ -14,7 +14,14 @@ extension View {
         controller.view.bounds = bounds
         return controller.view.snapshot()
     }
+    
+    func border(width: CGFloat = 1, edges: [Edges] = [.all], color: Color = Color.white) -> some View {
+        overlay(CustomBorder(width: width, edges: edges)
+                    .foregroundColor(color)
+        )
+    }
 }
+
 
 extension UIView {
     func snapshot() -> UIImage {

@@ -22,6 +22,8 @@ struct CameraView: View {
     
                 ScannerView()
                     .environmentObject(viewModel)
+                    .frame(width: CameraViewModel.viewportSize.width,
+                           height: CameraViewModel.viewportSize.height)
             } .position(x: Constant.screenBounds.width/2,
                         y: ((Constant.screenBounds.width / (viewModel.bufferSize.height / viewModel.bufferSize.width))/2))
             

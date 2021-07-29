@@ -27,7 +27,8 @@ class CameraViewModel: ObservableObject {
     }
     
     
-    static let viewportSize = CGSize(width: Constant.screenBounds.width * 3/4, height: 50)
+    static let viewportSize = CGSize(width: Constant.screenBounds.width * 0.5,
+                                     height: 50)
     
 }
 
@@ -238,7 +239,7 @@ class CameraViewController: UIViewController {
                 
                 if viewModel != nil {
                     DispatchQueue.main.async { [self] in
-                        bounds = boundingBox(forRegionOfInterest: bounds, fromOutput: viewModel.bufferSize)
+                        bounds = boundingBox(forRegionOfInterest: bounds, fromOutput: CameraViewModel.viewportSize)
                         viewModel.coords.append(bounds)
                         viewModel.word = recognizedText.string
                     }
@@ -270,23 +271,23 @@ class CameraViewController: UIViewController {
         let imageHeight = size.height
         
         let imageRatio = imageWidth / imageHeight
-        let width = Constant.screenBounds.width
+        let width = imageWidth
         let height = width / imageRatio
         
         // Begin with input rect.
         var rect = forRegionOfInterest
+        
+//        let bottomToTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -1)
+        let uiRotationTransform = CGAffineTransform(translationX: 1, y: 1).rotated(by: CGFloat.pi)
+//        let transform = bottomToTopTransform.concatenating(uiRotationTransform)
+        rect = rect.applying(uiRotationTransform)
         
         rect.size.height *= height
         rect.size.width *= width
         
         rect.origin.x = (rect.origin.x) * width
         rect.origin.y = rect.origin.y * height
-//        print("before: \(rect)")
-//        let bottomToTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -1)
-//        let uiRotationTransform = CGAffineTransform.identity// CGAffineTransform(translationX: 0, y: 1).rotated(by: -CGFloat.pi)
-//        let transform = bottomToTopTransform.concatenating(uiRotationTransform)
-//        rect = rect.applying(transform)
-//        print("after: \(rect)")
+
         return rect
     }
 

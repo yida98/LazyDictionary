@@ -21,12 +21,11 @@ struct ScannerView: View {
                     .foregroundColor(Color.clear)
                     .frame(width: rect.width,
                            height: rect.height)
-                    .offset(x: rect.origin.x, y: rect.origin.y)
-//                    .position(x: rect.midX,
-//                            y: rect.midY)
+                    .position(x: rect.midX,
+                              y: rect.midY)
             }
         }.background(Rectangle()
-                        .border(Color.blue, width: 1)
+                        .border(width: 2, edges: [.bottom])
                         .foregroundColor(Color.clear)
                         .frame(width: CameraViewModel.viewportSize.width,
                                height: CameraViewModel.viewportSize.height)
