@@ -25,10 +25,10 @@ struct CameraView: View {
                     .frame(width: CameraViewModel.viewportSize.width,
                            height: CameraViewModel.viewportSize.height)
             } .position(x: Constant.screenBounds.width/2,
-                        y: ((Constant.screenBounds.width / (viewModel.bufferSize.height / viewModel.bufferSize.width))/2))
+                        y: viewModel.trueCameraHeight/2)
             
             DictionaryView(viewModel: DictionaryViewModel(), word: $viewModel.word)
-                .offset(y: Constant.screenBounds.height * 0.8)
+                .offset(y: viewModel.trueCameraHeight)
                 
         }
         .ignoresSafeArea()

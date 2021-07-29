@@ -13,19 +13,16 @@ import AVFoundation
 
 class CameraViewModel: ObservableObject {
     
-    @Published var coords: [CGRect] = [CGRect]()// {
-//        willSet {
-//            print(newValue)
-//        }
-//    }
-    @Published var bufferSize: CGSize = CGSize(width: 1, height: 1)
-    
-    @Published var word: String = "" {
+    @Published var coords: [CGRect] = [CGRect]()
+    @Published var bufferSize: CGSize = CGSize(width: 1, height: 1) {
         willSet {
-//            print(newValue)
+            trueCameraHeight = Constant.screenBounds.width / (newValue.height / newValue.width)
         }
     }
     
+    @Published var trueCameraHeight: CGFloat = 1
+    
+    @Published var word: String = ""
     
     static let viewportSize = CGSize(width: Constant.screenBounds.width * 0.5,
                                      height: 50)

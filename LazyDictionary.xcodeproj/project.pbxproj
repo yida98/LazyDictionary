@@ -95,14 +95,8 @@
 			isa = PBXGroup;
 			children = (
 				E4A27D2626AA0B7E0085497A /* LazyDictionaryApp.swift */,
-				E4A27D2826AA0B7E0085497A /* ContentView.swift */,
-				E4A27D3726AA16F60085497A /* CameraView.swift */,
-				E4A27D3526AA0FFC0085497A /* ScannerView.swift */,
-				E4A27D3926AA1A040085497A /* CameraViewModel.swift */,
-				E4C65BFC26B1302A0085C406 /* DictionaryView.swift */,
-				E4C65BFE26B130660085C406 /* DictionaryViewModel.swift */,
+				E4A35C5A26B290A40008C238 /* Views */,
 				E4A27D3B26AA336A0085497A /* View+ext.swift */,
-				E4A35C5626B277D80008C238 /* CustomBorder.swift */,
 				E4A27D3F26AA5EE00085497A /* Image+ext.swift */,
 				E477771826AAA686000B3139 /* Constant.swift */,
 				E4A27D2A26AA0B810085497A /* Assets.xcassets */,
@@ -118,6 +112,36 @@
 				E4A27D2D26AA0B810085497A /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		E4A35C5826B290750008C238 /* CameraView */ = {
+			isa = PBXGroup;
+			children = (
+				E4A27D3726AA16F60085497A /* CameraView.swift */,
+				E4A27D3526AA0FFC0085497A /* ScannerView.swift */,
+				E4A27D3926AA1A040085497A /* CameraViewModel.swift */,
+			);
+			path = CameraView;
+			sourceTree = "<group>";
+		};
+		E4A35C5926B2908C0008C238 /* DictionaryView */ = {
+			isa = PBXGroup;
+			children = (
+				E4C65BFC26B1302A0085C406 /* DictionaryView.swift */,
+				E4C65BFE26B130660085C406 /* DictionaryViewModel.swift */,
+			);
+			path = DictionaryView;
+			sourceTree = "<group>";
+		};
+		E4A35C5A26B290A40008C238 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E4A27D2826AA0B7E0085497A /* ContentView.swift */,
+				E4A35C5826B290750008C238 /* CameraView */,
+				E4A35C5926B2908C0008C238 /* DictionaryView */,
+				E4A35C5626B277D80008C238 /* CustomBorder.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
