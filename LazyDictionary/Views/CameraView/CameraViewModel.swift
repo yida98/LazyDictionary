@@ -24,8 +24,8 @@ class CameraViewModel: ObservableObject {
     
     @Published var word: String = ""
     
-    static let viewportSize = CGSize(width: Constant.screenBounds.width * 0.5,
-                                     height: 50)
+    static let viewportSize = CGSize(width: Constant.screenBounds.width * 0.3,
+                                     height: 65)
     
 }
 
@@ -79,7 +79,6 @@ struct CameraViewRepresentable: UIViewControllerRepresentable {
                                                                                    y: originY),
                                                                    size: CameraViewModel.viewportSize),
                                                        in: parent.viewModel.bufferSize)
-            print(request.regionOfInterest)
 //            let imageRequestHandler = VNImageRequestHandler(cgImage: imageFromSampleBuffer(sampleBuffer : sampleBuffer).cgImage!, options: [:])
 //            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
             let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: CGImagePropertyOrientation.right, options: [:])
@@ -230,7 +229,7 @@ class CameraViewController: UIViewController {
             return
         }
         
-        if let result = closestToCentre(in: results) {
+        if let result = closestTo(.centre, in: results) {
             if let recognizedText = result.topCandidates(CameraViewController.maxCandidates).first {
                 var bounds = result.boundingBox
                 
@@ -245,18 +244,44 @@ class CameraViewController: UIViewController {
         }
     }
     
-    private func closestToCentre(in results: [VNRecognizedTextObservation]) -> VNRecognizedTextObservation? {
-        
+    private func closestTo(_ point: Point,in results: [VNRecognizedTextObservation]) -> VNRecognizedTextObservation? {
         return results.reduce(results.first) { result, observation in
-            var prevDistance = 0
-            var currDistance = 0
+            var prevDistance: Float = 0
+            var currDistance: Float = 0
             guard let prev = result else {
                 return observation
             }
-            prevDistance += abs(Int(0.5) - Int(prev.boundingBox.midX)) + abs(Int(0.5) - Int(prev.boundingBox.midY))
+            var pointX, pointY, prevX, prevY, currX, currY: Float
             
-            currDistance += abs(Int(0.5) - Int(observation.boundingBox.midX)) + abs(Int(0.5) - Int(observation.boundingBox.midY))
+            switch point {
+            case .bottom:
+                pointX = 0.5
+                pointY = 1
+                prevX = Float(prev.boundingBox.midX)
+                prevY = Float(prev.boundingBox.maxY)
+                currX = Float(observation.boundingBox.midX)
+                currY = Float(observation.boundingBox.maxY)
+            case .top:
+                pointX = 0.5
+                pointY = 0
+                prevX = Float(prev.boundingBox.midX)
+                prevY = Float(prev.boundingBox.minY)
+                currX = Float(observation.boundingBox.midX)
+                currY = Float(observation.boundingBox.minY)
+                
+            default: // Centre case
+                pointX = 0.5
+                pointY = 0.5
+                prevX = Float(prev.boundingBox.midX)
+                prevY = Float(prev.boundingBox.midY)
+                currX = Float(observation.boundingBox.midX)
+                currY = Float(observation.boundingBox.midY)
+            }
             
+            prevDistance += (pointX - prevX).magnitude + (pointY - prevY).magnitude
+            currDistance += (pointX - currX).magnitude + (pointY - currY).magnitude
+            
+            print(prevDistance, prev.boundingBox.midX, prev.boundingBox.midY, currDistance, observation.boundingBox.midX, observation.boundingBox.midY)
             return prevDistance > currDistance ? observation : result
         }
     }
@@ -296,3 +321,5 @@ extension CGRect: Hashable {
         
     }
 }
+
+//extension CGFloat

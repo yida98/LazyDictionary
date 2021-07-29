@@ -15,7 +15,7 @@ extension View {
         return controller.view.snapshot()
     }
     
-    func border(width: CGFloat = 1, edges: [Edges] = [.all], color: Color = Color.white) -> some View {
+    func border(width: CGFloat = 1, edges: [Point] = [.all], color: Color = Color.white) -> some View {
         overlay(CustomBorder(width: width, edges: edges)
                     .foregroundColor(color)
         )

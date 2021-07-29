@@ -25,9 +25,9 @@ struct CameraView: View {
                     .frame(width: CameraViewModel.viewportSize.width,
                            height: CameraViewModel.viewportSize.height)
             } .position(x: Constant.screenBounds.width/2,
-                        y: viewModel.trueCameraHeight/2)
+                        y: viewModel.trueCameraHeight/2 + 2)
             
-            DictionaryView(viewModel: DictionaryViewModel(), word: $viewModel.word)
+            DictionaryView(viewModel: DictionaryViewModel(word: $viewModel.word))
                 .offset(y: viewModel.trueCameraHeight)
                 
         }
