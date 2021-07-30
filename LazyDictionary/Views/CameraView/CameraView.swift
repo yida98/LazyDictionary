@@ -43,7 +43,7 @@ struct CameraView: View {
                     } label: {
                         Text("Search")
                             .foregroundColor(.white)
-                            .font(Font.custom("SF Pro Text", size: 20))
+                            .font(Font.custom(Constant.fontName, size: 20))
                             .fontWeight(.semibold)
                     }
                     .frame(width: CameraViewModel.buttonSize.width, height: CameraViewModel.buttonSize.height)
