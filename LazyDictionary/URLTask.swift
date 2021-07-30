@@ -43,11 +43,11 @@ struct URLTask {
         request.addValue(URLTask.appId, forHTTPHeaderField: "app_id")
         request.addValue(URLTask.appKey, forHTTPHeaderField: "app_key")
         
-        print(request)
-        
         return URLSession.shared.dataTaskPublisher(for: request)
             .tryMap {
                 if $0.response is HTTPURLResponse {
+                    let jsonData = try JSONSerialization.jsonObject(with: $0.data, options: .mutableContainers) as? String
+                    print(jsonData.u)
                     return $0.data
                 } else {
                     print("[ERROR] bad response")
@@ -108,5 +108,9 @@ extension String {
     func decodeUrl() -> String?
     {
         return self.removingPercentEncoding
+    }
+    
+    func unescapeUnicode() {
+        
     }
 }
