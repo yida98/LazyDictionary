@@ -28,7 +28,9 @@ class CameraViewModel: ObservableObject {
             loading = false
         }
     }
+    
     @Published var loading: Bool = false
+    @Published var allowsCameraUsage: Bool = true
     
     static let viewportSize = CGSize(width: Constant.screenBounds.width * 0.3,
                                      height: 65)
@@ -41,6 +43,14 @@ class CameraViewModel: ObservableObject {
     static let buttonCornerRadius: CGFloat = 20
     
     var cancellableSet = Set<AnyCancellable>()
+    
+    init() {
+        CameraViewModel.requestCameraAccess { success in
+            Just(success)
+                .receive(on: RunLoop.main)
+                .assign(to: &self.$allowsCameraUsage)
+        }
+    }
     
     func lookup() {
         if word != "" {
@@ -65,6 +75,11 @@ class CameraViewModel: ObservableObject {
         Storage.shared.entries.remove(atOffsets: indexSet)
     }
     
+    static func requestCameraAccess(_ completion: @escaping (_ success: Bool) -> Void) {
+        AVCaptureDevice.requestAccess(for: .video) { success in
+            completion(success)
+        }
+    }
 }
 
 struct CameraViewRepresentable: UIViewControllerRepresentable {

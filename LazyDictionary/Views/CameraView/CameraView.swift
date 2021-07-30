@@ -53,6 +53,19 @@ struct CameraView: View {
                             .frame(width: CameraViewModel.buttonSize.width, height: CameraViewModel.buttonSize.height))
                 }
             }
+            AlertView(isPresenting: !viewModel.allowsCameraUsage) {
+                Button {
+                    Constant.openSettings()
+                } label: {
+                    HStack {
+                        Text("Camera disabled in settings")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        Image(systemName: "arrowshape.turn.up.right.circle.fill")
+                            .foregroundColor(.lightGrey)
+                    }
+                }
+            }
         }
         .ignoresSafeArea()
     }

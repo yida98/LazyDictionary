@@ -22,6 +22,10 @@ struct Constant {
     static let secondaryColorDark: Color = .moodPurple
     static let secondaryColorGrey: Color = .sonicSilver
     static let secondaryColorLight: Color = .magnolia
+    
+    static func openSettings() {
+        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+    }
 }
 
 extension Color {

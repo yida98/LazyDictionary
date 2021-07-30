@@ -29,6 +29,7 @@
 		E4A35C7426B3BDE00008C238 /* DefinitionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A35C7326B3BDE00008C238 /* DefinitionViewModel.swift */; };
 		E4C65BFD26B1302A0085C406 /* DictionaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4C65BFC26B1302A0085C406 /* DictionaryView.swift */; };
 		E4C65BFF26B130660085C406 /* DictionaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4C65BFE26B130660085C406 /* DictionaryViewModel.swift */; };
+		E4F4F88626B4090300FDF29C /* AlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F4F88526B4090300FDF29C /* AlertView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		E4A35C7326B3BDE00008C238 /* DefinitionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefinitionViewModel.swift; sourceTree = "<group>"; };
 		E4C65BFC26B1302A0085C406 /* DictionaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryView.swift; sourceTree = "<group>"; };
 		E4C65BFE26B130660085C406 /* DictionaryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryViewModel.swift; sourceTree = "<group>"; };
+		E4F4F88526B4090300FDF29C /* AlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				E4A27D3726AA16F60085497A /* CameraView.swift */,
+				E4F4F88526B4090300FDF29C /* AlertView.swift */,
 				E4A27D3526AA0FFC0085497A /* ScannerView.swift */,
 				E4A27D3926AA1A040085497A /* CameraViewModel.swift */,
 			);
@@ -290,6 +293,7 @@
 				E4A35C6726B380820008C238 /* Entry.swift in Sources */,
 				E4C65BFF26B130660085C406 /* DictionaryViewModel.swift in Sources */,
 				E4A27D3626AA0FFC0085497A /* ScannerView.swift in Sources */,
+				E4F4F88626B4090300FDF29C /* AlertView.swift in Sources */,
 				E4A35C6E26B3B6820008C238 /* DefinitionView.swift in Sources */,
 				E4A27D4026AA5EE00085497A /* Image+ext.swift in Sources */,
 				E4A27D2926AA0B7E0085497A /* ContentView.swift in Sources */,
