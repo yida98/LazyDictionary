@@ -12,36 +12,43 @@ struct DefinitionView: View {
     var word: HeadwordEntry
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(word.word)
-                .font(Font.custom(Constant.fontName, size: 20))
-                .fontWeight(.semibold)
-                .foregroundColor(Constant.secondaryColorDark)
+        ScrollView(.vertical, showsIndicators: false, content: {
             
-            Text(DefinitionViewModel.phoneticString(for: word))
-                .font(Font.custom(Constant.fontName, size: 14))
-                .foregroundColor(Constant.primaryColorDark)
-            
-            VStack(spacing: 20) {
-                ForEach(word.lexicalEntries) { lexicalEntry in
-                    
-                    Text(lexicalEntry.lexicalCategory.text.capitalized)
-                        .font(Font.custom(Constant.fontName, size: 14))
-                        .italic()
-                        .foregroundColor(Constant.secondaryColorGrey)
-                    
-                    ForEach(DefinitionViewModel.sense(of: lexicalEntry)) { sense in
-
-                        if sense.definitions != nil {
-                            ForEach(sense.definitions!, id: \.self) { definition in
-                                Text("\(definition)")
-                            }
-                        }
+            VStack(alignment: .leading) {
+                Text(word.word)
+                    .font(Font.custom(Constant.fontName, size: 40))
+                    .fontWeight(.semibold)
+                    .foregroundColor(Constant.secondaryColorDark)
+                
+                Text(DefinitionViewModel.phoneticString(for: word))
+                    .font(Font.custom(Constant.fontName, size: 14))
+                    .foregroundColor(Constant.primaryColorDark)
+                    .padding(.bottom, 20)
+                
+                VStack(alignment: .leading,spacing: 20) {
+                    ForEach(word.lexicalEntries) { lexicalEntry in
                         
+                        Text(lexicalEntry.lexicalCategory.text.capitalized)
+                            .font(Font.system(.footnote, design: .monospaced))
+                            .italic()
+                            .foregroundColor(Constant.secondaryColorGrey)
+                        
+                        ForEach(DefinitionViewModel.sense(of: lexicalEntry)) { sense in
+
+                            if sense.definitions != nil {
+                                ForEach(sense.definitions!, id: \.self) { definition in
+                                    Text("\(definition)")
+                                        .font(Font.custom(Constant.fontName, size: 12))
+                                        .foregroundColor(Constant.primaryColorDark)
+                                }
+                            }
+                            
+                        }
                     }
                 }
-            }
-        }
+            }.padding(.bottom, 50)
+            
+        })
     }
 }
 
@@ -56,7 +63,12 @@ struct DefinitionView_Previews: PreviewProvider {
         
         let pronunciation = Pronunciation(audioFile: nil, dialects: nil, phoneticNotation: "respell", phoneticSpelling: "ās", regions: nil, registers: nil)
         let lexicalEntry = LexicalEntry(entries: [entry], language: "us-en", lexicalCategory: LexicalCategory(id: "noun", text: "Noun"), pronunciations: [pronunciation], root: nil, text: "ace")
-        let entry = HeadwordEntry(id: "1", language: "en-us", lexicalEntries: [lexicalEntry], pronunciations: [pronunciation], type: nil, word: "ace")
-        DefinitionView(word: entry)
+        
+        
+        
+        let pronunciation2 = Pronunciation(audioFile: nil, dialects: nil, phoneticNotation: "respell", phoneticSpelling: "āss", regions: nil, registers: nil)
+        let lexicalEntry2 = LexicalEntry(entries: [entry], language: "us-en", lexicalCategory: LexicalCategory(id: "adjective", text: "Adjective"), pronunciations: [pronunciation2], root: nil, text: "ace")
+        let hwEntry = HeadwordEntry(id: "1", language: "en-us", lexicalEntries: [lexicalEntry, lexicalEntry2], pronunciations: [pronunciation], type: nil, word: "ace")
+        DefinitionView(word: hwEntry)
     }
 }

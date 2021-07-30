@@ -27,7 +27,7 @@ struct SearchView: View {
                     DefinitionView(word: viewModel.headwordEntry!)
                 }
             }
-        }
+        }.padding(60)
     }
 }
 

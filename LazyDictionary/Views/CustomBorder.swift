@@ -49,7 +49,6 @@ struct CustomBorder: Shape {
             }
             path.addPath(Path(CGRect(x: x, y: y, width: w, height: h)))
         }
-        print(path)
         return path
     }
 }

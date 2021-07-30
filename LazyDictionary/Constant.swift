@@ -21,6 +21,7 @@ struct Constant {
     static let secondaryColor: Color = .thistle
     static let secondaryColorDark: Color = .moodPurple
     static let secondaryColorGrey: Color = .sonicSilver
+    static let secondaryColorLight: Color = .magnolia
 }
 
 extension Color {
@@ -31,4 +32,5 @@ extension Color {
     static let thistle: Color = Color(red: 213/255, green: 197/255, blue: 227/255)
     static let moodPurple: Color = Color(red: 130/255, green: 119/255, blue: 137/255)
     static let sonicSilver: Color = Color(red: 127/255, green: 121/255, blue: 121/255)
+    static let magnolia: Color = Color(red: 248/255, green: 242/255, blue: 252/255)
 }

@@ -12,7 +12,7 @@ struct URLTask {
     
     static let shared = URLTask()
     
-    private static let urlBase = "https://od-api.oxforddictionaries.com:443/api/v2/entries/"
+    private static let urlBase = "https://od-api.oxforddictionaries.com/api/v2/entries/"
     private static let appId = "b68e6b0c"
     private static let appKey = "925663b99eb05101c30ba2deea94cac6"
     
@@ -37,6 +37,7 @@ struct URLTask {
                 if $0.response is HTTPURLResponse {
                     return $0.data
                 } else {
+                    print("[ERROR] bad response")
                     throw NetworkError.badResponse
                 }
             }
@@ -45,6 +46,7 @@ struct URLTask {
                 if let result = $0.results, let firstResult = result.first {
                     return firstResult
                 } else {
+                    print("[ERROR] no result")
                     throw LazyDictionaryError.noResult
                 }
             }

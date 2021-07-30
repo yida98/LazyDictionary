@@ -17,13 +17,14 @@ struct DictionaryView: View {
             SearchView()
                 .environmentObject(viewModel)
             
-            ArchiveView()
-                .environmentObject(viewModel)
+//            ArchiveView()
+//                .environmentObject(viewModel)
+//                .padding(.bottom, 20)
             Spacer()
         }
-        .background(Color.thistle)
         .frame(width: Constant.screenBounds.width,
-                height: Constant.screenBounds.height)
+               height: (Constant.screenBounds.height - viewModel.trueCameraHeight) + 60)
+        .background(Constant.secondaryColorLight)
         .cornerRadius(30)
         
     }

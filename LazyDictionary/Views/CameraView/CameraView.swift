@@ -28,11 +28,11 @@ struct CameraView: View {
                                 .foregroundColor(Color.babyPowder)
                                 .offset(y: CameraViewModel.viewportSize.height*0.5 + 16))
             } .position(x: Constant.screenBounds.width/2,
-                        y: viewModel.trueCameraHeight/2 + 2)
+                        y: viewModel.trueCameraHeight/2)
             
             DictionaryView()
                 .environmentObject(viewModel)
-                .offset(y: viewModel.trueCameraHeight - 34)
+                .offset(y: viewModel.trueCameraHeight/2)
             
             VStack {
                 Spacer()
