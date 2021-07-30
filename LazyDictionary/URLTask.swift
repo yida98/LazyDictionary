@@ -22,15 +22,28 @@ struct URLTask {
     
     var storage: Set<AnyCancellable> = Set<AnyCancellable>()
     
-    func post(word: String,
+    func get(word: String,
                        language: URLTask.Language = URLTask.default_language,
-                       fields: Array<String> = ["definitions", "pronunciation"],
-                       strictMatch: Bool = false) -> AnyPublisher<HeadwordEntry, Never> {
-        let url = URL(string: URLTask.requestURL(for: word, in: language, fields: fields, strictMatch: strictMatch))!
+                       fields: Array<String> = ["definitions", "pronunciations"],
+                       strictMatch: Bool = false) -> AnyPublisher<HeadwordEntry?, Never> {
+        let trimmedWord = word.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard let requestURL = URLTask.requestURL(for: trimmedWord, in: language, fields: fields, strictMatch: strictMatch) else {
+            print("[ERROR] Invalid word")
+            return Just(nil).eraseToAnyPublisher()
+        }
+        
+        guard let url = URL(string: requestURL) else {
+            print("[ERROR] Invalid URL")
+            return Just(nil).eraseToAnyPublisher()
+        }
+        
         var request = URLRequest(url: url)
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue(URLTask.appId, forHTTPHeaderField: "app_id")
         request.addValue(URLTask.appKey, forHTTPHeaderField: "app_key")
+        
+        print(request)
         
         return URLSession.shared.dataTaskPublisher(for: request)
             .tryMap {
@@ -50,10 +63,7 @@ struct URLTask {
                     throw LazyDictionaryError.noResult
                 }
             }
-            .handleEvents(receiveOutput: { [cache] entry in
-                cache.setObject(entry, forKey: request.url! as NSURL)
-            })
-            .assertNoFailure("This shouldn't happen, right?")
+            .replaceError(with: nil)
             .eraseToAnyPublisher()
             
     }
@@ -61,8 +71,11 @@ struct URLTask {
     private static func requestURL(for word_id: String,
                                    in language: URLTask.Language = URLTask.default_language,
                                    fields: Array<String> = [],
-                                   strictMatch: Bool = false) -> String {
-        return "\(URLTask.urlBase)\(language.rawValue)/\(word_id.lowercased())?fields=\(fields.joined(separator: "%2C"))&strictMatch=\(strictMatch)"
+                                   strictMatch: Bool = false) -> String? {
+        if let encodedURL = word_id.lowercased().encodeUrl() {
+            return "\(URLTask.urlBase)\(language.rawValue)/\(encodedURL)?fields=\(fields.joined(separator: "%2C"))&strictMatch=\(strictMatch)"
+        }
+        return nil
     }
     
     enum Language: String {
@@ -85,4 +98,15 @@ enum NetworkError: Error {
 
 enum LazyDictionaryError: Error {
     case noResult
+}
+
+extension String {
+    func encodeUrl() -> String?
+    {
+        return self.addingPercentEncoding( withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+    }
+    func decodeUrl() -> String?
+    {
+        return self.removingPercentEncoding
+    }
 }

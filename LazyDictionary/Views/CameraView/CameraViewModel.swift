@@ -39,39 +39,24 @@ class CameraViewModel: ObservableObject {
     static let buttonPadding: CGFloat = 50
     static let buttonCornerRadius: CGFloat = 20
     
+    var cancellableSet = Set<AnyCancellable>()
+    
     func lookup() {
         if word != "" {
             loading = true
-//
-//            sleep(4)
-//
-//            loading = false
-//
-//            let subsense = Sense(definitions: ["(in tennis and similar games) a service that an opponent is unable to touch and thus wins a point"], id: "m_en_gbus0005680.013", subsenses: nil)
-//            let sense1 = Sense(definitions: ["a playing card with a single spot on it, ranked as the highest card in its suit in most card games", "a person who excels at a particular sport or other activity"], id: "m_en_gbus0005680.006", subsenses: nil)
-//            let sense2 = Sense(definitions: nil, id: "m_en_gbus0005680.010", subsenses: nil)
-//            let sense3 = Sense(definitions: ["a pilot who has shot down many enemy aircraft, especially in World War I or World War II."], id: "m_en_gbus0005680.011", subsenses: [subsense])
-//
-//            let entry = Entry(homographNumber: nil, senses: [sense1, sense2, sense3])
-//
-//            let pronunciation = Pronunciation(audioFile: nil, dialects: nil, phoneticNotation: "respell", phoneticSpelling: "ās", regions: nil, registers: nil)
-//            let pronunciation2 = Pronunciation(audioFile: nil, dialects: nil, phoneticNotation: "respell", phoneticSpelling: "āss", regions: nil, registers: nil)
-//
-//            let lexicalEntry = LexicalEntry(entries: [entry], language: "us-en", lexicalCategory: LexicalCategory(id: "noun", text: "Noun"), pronunciations: [pronunciation], root: nil, text: "ace")
-//            let lexicalEntry2 = LexicalEntry(entries: [entry], language: "us-en", lexicalCategory: LexicalCategory(id: "adjective", text: "Adjective"), pronunciations: [pronunciation2], root: nil, text: "ace")
-//
-//            let hwEntry = HeadwordEntry(id: "1", language: "en-us", lexicalEntries: [lexicalEntry, lexicalEntry2], pronunciations: [pronunciation], type: nil, word: "ace")
-//
-//            headwordEntry = hwEntry
 
-            URLTask.shared.post(word: word)
+            URLTask.shared.get(word: word)
                 .receive(on: RunLoop.main)
-                .map {
-                    let value = $0
-                    self.loading = false
-                    return value
-                }
-                .assign(to: &$headwordEntry)
+                .sink(receiveCompletion: { completion in
+                    print("completed")
+                }, receiveValue: { entry in
+                    if let newEntry = entry {
+                        self.headwordEntry = newEntry
+                    } else {
+                        self.headwordEntry = nil
+                    }
+                })
+                .store(in: &cancellableSet)
         }
     }
     
