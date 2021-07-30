@@ -65,7 +65,7 @@ struct CameraView: View {
                             .foregroundColor(.lightGrey)
                     }
                 }
-            }
+            }.offset(y: 50)
         }
         .ignoresSafeArea()
     }

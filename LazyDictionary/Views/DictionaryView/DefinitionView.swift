@@ -15,10 +15,13 @@ struct DefinitionView: View {
         ScrollView(.vertical, showsIndicators: false, content: {
             
             VStack(alignment: .leading) {
-                Text(word.word)
-                    .font(Font.custom(Constant.fontName, size: 40))
-                    .fontWeight(.semibold)
-                    .foregroundColor(Constant.secondaryColorDark)
+                HStack {
+                    Text(word.word)
+                        .font(Font.custom(Constant.fontName, size: 40))
+                        .fontWeight(.semibold)
+                        .foregroundColor(Constant.secondaryColorDark)
+                    Spacer()
+                }
                 
                 Text(DefinitionViewModel.phoneticString(for: word))
                     .font(Font.custom(Constant.fontName, size: 14))
