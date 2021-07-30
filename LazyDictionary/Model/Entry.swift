@@ -7,13 +7,12 @@
 
 import Foundation
 
-struct RetrieveEntry: Codable, Identifiable {
+struct RetrieveEntry: Codable {
     var metadata: Dictionary<String, String>?
     var results: Array<HeadwordEntry>?
-    var id: String
 }
 
-struct HeadwordEntry: Codable {
+class HeadwordEntry: NSObject, Codable, Identifiable {
     var id: String
     var language: String
     var lexicalEntries: Array<LexicalEntry>

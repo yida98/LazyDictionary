@@ -23,6 +23,8 @@ class CameraViewModel: ObservableObject {
     @Published var trueCameraHeight: CGFloat = 1
     
     @Published var word: String = ""
+    @Published var headwordEntry: HeadwordEntry?
+    @Published var loading: Bool = false
     
     static let viewportSize = CGSize(width: Constant.screenBounds.width * 0.3,
                                      height: 65)
@@ -34,12 +36,24 @@ class CameraViewModel: ObservableObject {
     static let buttonCornerRadius: CGFloat = 20
     
     func lookup() {
-        print("lookup")
+        if word != "" {
+            loading = true
+            URLTask.shared.post(word: word)
+                .receive(on: RunLoop.main)
+                .map {
+                    let value = $0
+                    self.loading = false
+                    return value
+                }
+                .assign(to: &$headwordEntry)
+        }
+    }
+    
+    func removeEntry(indexSet: IndexSet) {
+        Storage.shared.entries.remove(atOffsets: indexSet)
     }
     
 }
-
-
 
 struct CameraViewRepresentable: UIViewControllerRepresentable {
     var viewModel: CameraViewModel
@@ -264,14 +278,14 @@ class CameraViewController: UIViewController {
             var pointX, pointY, prevX, prevY, currX, currY: Float
             
             switch point {
-            case .bottom:
+            case .top:
                 pointX = 0.5
                 pointY = 1
                 prevX = Float(prev.boundingBox.midX)
                 prevY = Float(prev.boundingBox.maxY)
                 currX = Float(observation.boundingBox.midX)
                 currY = Float(observation.boundingBox.maxY)
-            case .top:
+            case .bottom:
                 pointX = 0.5
                 pointY = 0
                 prevX = Float(prev.boundingBox.midX)

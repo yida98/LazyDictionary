@@ -9,21 +9,21 @@ import SwiftUI
 
 struct DictionaryView: View {
     
-    @ObservedObject var viewModel: DictionaryViewModel
+    @EnvironmentObject var parent: CameraViewModel
     @ObservedObject var storage: Storage = Storage.shared
     
     var body: some View {
         ZStack {
             VStack {
-                Text(viewModel.word)
+                Text(parent.word)
                 
                 Text("Vocabulary")
                     .font(Font.system(.title))
                 List {
                     ForEach(storage.entries) { entry in
-                        Text(entry.results!.first!.word)
+                        Text(entry.word)
                     }.onDelete { indexSet in
-                        viewModel.removeEntry(indexSet: indexSet)
+                        parent.removeEntry(indexSet: indexSet)
                     }
                 }
                 Spacer()

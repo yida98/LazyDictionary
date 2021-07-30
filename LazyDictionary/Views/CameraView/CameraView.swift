@@ -30,7 +30,8 @@ struct CameraView: View {
             } .position(x: Constant.screenBounds.width/2,
                         y: viewModel.trueCameraHeight/2 + 2)
             
-            DictionaryView(viewModel: DictionaryViewModel(word: $viewModel.word))
+            DictionaryView()
+                .environmentObject(viewModel)
                 .offset(y: viewModel.trueCameraHeight - 34)
             
             VStack {

@@ -54,13 +54,16 @@ final class Storage: ObservableObject {
     
     var objectWillChange = PassthroughSubject<Void, Never>()
     
-    @UserDefault(.entry, defaultValue: [RetrieveEntry]())
-    var entries: [RetrieveEntry] {
+    @UserDefault(.entry, defaultValue: [HeadwordEntry]())
+    var entries: [HeadwordEntry] {
         willSet {
             objectWillChange.send()
         }
     }
     
+    func insertEntry(entry: HeadwordEntry) {
+        
+    }
 }
 
 protocol PropertyListValue {}
