@@ -7,9 +7,10 @@
 
 import Foundation
 
-struct RetrieveEntry: Codable {
+struct RetrieveEntry: Codable, Identifiable {
     var metadata: Dictionary<String, String>?
     var results: Array<HeadwordEntry>?
+    var id: String
 }
 
 struct HeadwordEntry: Codable {

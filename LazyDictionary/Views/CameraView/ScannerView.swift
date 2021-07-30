@@ -16,16 +16,17 @@ struct ScannerView: View {
     var body: some View {
         ZStack {
             ForEach(viewModel.coords, id: \.self) { rect in
-                Rectangle()
-                    .border(Color.red, width: 2)
-                    .foregroundColor(Color.clear)
-                    .frame(width: rect.width,
-                           height: rect.height)
-                    .position(x: rect.midX,
-                              y: rect.midY)
+                ZStack {
+                    RoundedRectangle(cornerRadius: CameraViewModel.boundingBoxCornerRadius)
+                        .foregroundColor(Color.darkSkyBlue.opacity(0.3))
+                        .frame(width: rect.width,
+                               height: rect.height)
+                        .position(x: rect.midX,
+                                  y: rect.midY)
+                }
             }
         }.background(Rectangle()
-                        .border(width: 2, edges: [.bottom])
+                        .border(width: 2, edges: [.bottom], color: Color.babyPowder)
                         .foregroundColor(Color.clear)
                         .frame(width: CameraViewModel.viewportSize.width,
                                height: CameraViewModel.viewportSize.height)

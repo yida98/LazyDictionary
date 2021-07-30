@@ -26,6 +26,16 @@ class CameraViewModel: ObservableObject {
     
     static let viewportSize = CGSize(width: Constant.screenBounds.width * 0.3,
                                      height: 65)
+    static let boundingBoxPadding: CGFloat = 4
+    static let boundingBoxCornerRadius: CGFloat = 6
+    
+    static let buttonSize = CGSize(width: 90, height: 40)
+    static let buttonPadding: CGFloat = 50
+    static let buttonCornerRadius: CGFloat = 20
+    
+    func lookup() {
+        print("lookup")
+    }
     
 }
 
@@ -229,7 +239,7 @@ class CameraViewController: UIViewController {
             return
         }
         
-        if let result = closestTo(.centre, in: results) {
+        if let result = closestTo(.bottom, in: results) {
             if let recognizedText = result.topCandidates(CameraViewController.maxCandidates).first {
                 var bounds = result.boundingBox
                 

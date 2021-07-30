@@ -10,6 +10,8 @@ import Combine
 
 struct URLTask {
     
+    static let shared = URLTask()
+    
     private static let urlBase = "https://od-api.oxforddictionaries.com:443/api/v2/entries/"
     private static let appId = "b68e6b0c"
     private static let appKey = "925663b99eb05101c30ba2deea94cac6"
@@ -18,7 +20,12 @@ struct URLTask {
     
     var storage: Set<AnyCancellable> = Set<AnyCancellable>()
     
-    mutating func post(word: String,
+    func isEntry(word: String) -> Bool {
+    
+        return false
+    }
+    
+    private mutating func post(word: String,
                        language: URLTask.Language = URLTask.default_language,
                        fields: Array<String> = ["definitions", "pronunciation"],
                        strictMatch: Bool = true) {
@@ -29,9 +36,9 @@ struct URLTask {
         request.addValue(URLTask.appKey, forHTTPHeaderField: "app_key")
         
         URLSession.shared.dataTaskPublisher(for: request)
-           .tryMap { try URLTask.parseResult(data: $0.data) }
-           .sink { _ in print("completion") } receiveValue: { print($0.results?.first?.lexicalEntries.first?.lexicalCategory) }
-           .store(in: &storage)
+            .tryMap { try URLTask.parseResult(data: $0.data) }
+            .sink { _ in print("completion") } receiveValue: { print($0.results?.first?.lexicalEntries.first?.lexicalCategory) }
+            .store(in: &storage)
     }
     
     private static func parseResult(data: Data) throws -> RetrieveEntry {

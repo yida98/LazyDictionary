@@ -14,5 +14,15 @@ class DictionaryViewModel: ObservableObject {
     init(word: Binding<String>) {
         self._word = word
     }
+    
+    func lookup() {
+        if !word.contains(" ") {
+            // TODO: Post
+        }
+    }
+    
+    func removeEntry(indexSet: IndexSet) {
+        Storage.shared.entries.remove(atOffsets: indexSet)
+    }
 
 }
