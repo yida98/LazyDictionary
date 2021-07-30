@@ -34,6 +34,7 @@ class CameraViewModel: ObservableObject {
                                      height: 65)
     static let boundingBoxPadding: CGFloat = 4
     static let boundingBoxCornerRadius: CGFloat = 6
+    static let viewFurtherInset: CGFloat = 50
     
     static let buttonSize = CGSize(width: 90, height: 40)
     static let buttonPadding: CGFloat = 50
@@ -48,7 +49,7 @@ class CameraViewModel: ObservableObject {
             URLTask.shared.get(word: word)
                 .receive(on: RunLoop.main)
                 .sink(receiveCompletion: { completion in
-                    print("completed")
+                    debugPrint("completed")
                 }, receiveValue: { entry in
                     if let newEntry = entry {
                         self.headwordEntry = newEntry
@@ -258,6 +259,7 @@ class CameraViewController: UIViewController {
         }
         DispatchQueue.main.async { [self] in
             viewModel.coords = [CGRect]()
+            viewModel.word = ""
         }
         guard let results = request.results as? [VNRecognizedTextObservation] else {
             print("no requests")

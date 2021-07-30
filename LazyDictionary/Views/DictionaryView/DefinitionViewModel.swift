@@ -11,14 +11,13 @@ class DefinitionViewModel {
     
     static func phoneticString(for word: HeadwordEntry) -> String {
         var phoneticSet = Set<String>()
-        print(word.lexicalEntries.first?.pronunciations)
-        for entry in word.lexicalEntries {
+        let entries = word.lexicalEntries.flatMap { $0.entries }
+        for entry in entries {
             if let p = entry.pronunciations {
-                p.map { $0.phoneticSpelling }.forEach { if $0 != nil { phoneticSet.insert($0!.escaped(asASCII: false)) } }
+                p.map { $0.phoneticSpelling }.forEach { if $0 != nil { phoneticSet.insert($0!) } }
             }
         }
         // TODO: No pronunciation
-        print(phoneticSet)
         return "/  \(Array(phoneticSet).joined(separator: ", "))  /"
     }
     

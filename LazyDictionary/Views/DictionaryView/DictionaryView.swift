@@ -23,7 +23,7 @@ struct DictionaryView: View {
             Spacer()
         }
         .frame(width: Constant.screenBounds.width,
-               height: (Constant.screenBounds.height - viewModel.trueCameraHeight) + 60)
+               height: (Constant.screenBounds.height - viewModel.trueCameraHeight) + CameraViewModel.viewFurtherInset*2)
         .background(Constant.secondaryColorLight)
         .cornerRadius(30)
         

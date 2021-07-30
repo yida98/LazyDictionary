@@ -34,8 +34,8 @@ struct DefinitionView: View {
                                 .italic()
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 3)
-                                .foregroundColor(Constant.secondaryColorGrey)
-                                .background(Color.white.opacity(0.5))
+                                .foregroundColor(Constant.secondaryColorDark)
+                                .background(Constant.secondaryColorGrey.opacity(0.3))
                                 .cornerRadius(5)
                             
                             ForEach(DefinitionViewModel.sense(of: lexicalEntry)) { sense in
@@ -52,7 +52,8 @@ struct DefinitionView: View {
                         }
                     }
                 }
-            }.padding(.bottom, 50)
+            }.padding(.bottom, 120)
+            .padding(.top, 30)
             
         })
     }

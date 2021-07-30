@@ -43,18 +43,19 @@ struct URLTask {
         request.addValue(URLTask.appId, forHTTPHeaderField: "app_id")
         request.addValue(URLTask.appKey, forHTTPHeaderField: "app_key")
         
+        var decoder = JSONDecoder()
+        
         return URLSession.shared.dataTaskPublisher(for: request)
             .tryMap {
                 if $0.response is HTTPURLResponse {
-                    let jsonData = try JSONSerialization.jsonObject(with: $0.data, options: .mutableContainers) as? String
-                    print(jsonData.u)
+//                    let jsonData = try JSONSerialization.jsonObject(with: $0.data, options: .mutableContainers)
                     return $0.data
                 } else {
                     print("[ERROR] bad response")
                     throw NetworkError.badResponse
                 }
             }
-            .decode(type: RetrieveEntry.self, decoder: JSONDecoder())
+            .decode(type: RetrieveEntry.self, decoder: decoder)
             .tryMap {
                 if let result = $0.results, let firstResult = result.first {
                     return firstResult

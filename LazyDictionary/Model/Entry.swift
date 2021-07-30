@@ -16,7 +16,7 @@ class HeadwordEntry: NSObject, Codable, Identifiable {
     var id: String
     var language: String
     var lexicalEntries: Array<LexicalEntry>
-    var pronunciations: Array<Pronunciation>?
+//    var pronunciations: Array<Pronunciation>?
     var type: String?
     var word: String
 }
@@ -25,7 +25,6 @@ struct LexicalEntry: Codable, Identifiable {
     var entries: Array<Entry>
     var language: String
     var lexicalCategory: LexicalCategory
-    var pronunciations: Array<Pronunciation>?
     var root: String?
     var text: String
     var id: String {
@@ -37,6 +36,7 @@ struct LexicalEntry: Codable, Identifiable {
 struct Entry: Codable, Identifiable {
     var homographNumber: String?
     var senses: Array<Sense>?
+    var pronunciations: Array<Pronunciation>?
     var id: String {
         return homographNumber ?? UUID().uuidString
     }

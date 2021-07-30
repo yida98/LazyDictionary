@@ -15,6 +15,7 @@ struct SearchView: View {
         VStack {
             if viewModel.loading {
                 Text("Fetching...")
+                    .padding()
             } else {
                 if viewModel.headwordEntry == nil {
                     VStack(alignment: .center) {
@@ -22,12 +23,13 @@ struct SearchView: View {
                             .font(Font.custom(Constant.fontName, size: 20))
                             .fontWeight(.semibold)
                             .foregroundColor(Color.gray)
-                    }
+                    }.padding()
                 } else {
                     DefinitionView(word: viewModel.headwordEntry!)
                 }
             }
-        }.padding(60)
+        }.padding(.horizontal, 60)
+        .padding(.vertical, 10)
     }
 }
 

@@ -112,12 +112,10 @@
 			children = (
 				E4A27D2626AA0B7E0085497A /* LazyDictionaryApp.swift */,
 				E4A35C5A26B290A40008C238 /* Views */,
-				E4A27D3B26AA336A0085497A /* View+ext.swift */,
-				E4A27D3F26AA5EE00085497A /* Image+ext.swift */,
-				E477771826AAA686000B3139 /* Constant.swift */,
 				E4A35C5B26B35B220008C238 /* URLTask.swift */,
 				E4A35C6C26B387690008C238 /* Persistence */,
 				E4A35C6126B36C300008C238 /* Model */,
+				E4F4F87E26B403CB00FDF29C /* Helpers */,
 				E4A27D2A26AA0B810085497A /* Assets.xcassets */,
 				E4A27D2F26AA0B810085497A /* Info.plist */,
 				E4A27D2C26AA0B810085497A /* Preview Content */,
@@ -182,6 +180,16 @@
 				E4A35C6A26B387260008C238 /* Logger.swift */,
 			);
 			path = Persistence;
+			sourceTree = "<group>";
+		};
+		E4F4F87E26B403CB00FDF29C /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				E4A27D3B26AA336A0085497A /* View+ext.swift */,
+				E4A27D3F26AA5EE00085497A /* Image+ext.swift */,
+				E477771826AAA686000B3139 /* Constant.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

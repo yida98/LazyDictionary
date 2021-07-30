@@ -32,7 +32,7 @@ struct CameraView: View {
             
             DictionaryView()
                 .environmentObject(viewModel)
-                .offset(y: viewModel.trueCameraHeight/2)
+                .offset(y: viewModel.trueCameraHeight/2 - CameraViewModel.viewFurtherInset)
             
             VStack {
                 Spacer()
